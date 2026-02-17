@@ -1,13 +1,6 @@
-﻿using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using UyKonek.Services;
+using UyKonek.ViewModels;
 
 namespace UyKonek
 {
@@ -19,6 +12,10 @@ namespace UyKonek
         public MainWindow()
         {
             InitializeComponent();
+
+            var settingsService = new SettingsService();
+            var apiClientService = new ApiClientService(settingsService);
+            DataContext = new DashboardViewModel(apiClientService, settingsService);
         }
     }
 }
