@@ -1,0 +1,12 @@
+﻿<Window x:Class="UyKonek.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:UyKonek.Views"
+        Title="NetPulse" Height="720" Width="1200"
+        MinHeight="600" MinWidth="960"
+        WindowStartupLocation="CenterScreen"
+        Background="#0F172A">
+    <Grid Margin="12">
+        <views:DashboardView />
+    </Grid>
+</Window>
