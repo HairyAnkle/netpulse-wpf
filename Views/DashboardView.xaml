@@ -24,10 +24,9 @@
 
             <StackPanel Grid.Row="1" Orientation="Vertical" Margin="0,0,0,12">
                 <TextBlock Text="{Binding StatusMessage}" Foreground="#D1D5DB" FontSize="14" />
-                <TextBlock Foreground="#9CA3AF" FontSize="12">
-                    <Run Text="Backend: " />
-                    <Run Text="{Binding BackendUrl}" />
-                </TextBlock>
+                <TextBlock Foreground="#9CA3AF"
+                           FontSize="12"
+                           Text="{Binding BackendUrl, Mode=OneWay, StringFormat=Backend: {0}}" />
                 <TextBlock Text="{Binding ErrorMessage}" Foreground="#FCA5A5" TextWrapping="Wrap" />
                 <ProgressBar Height="6" IsIndeterminate="True" Visibility="{Binding IsScanning, Converter={StaticResource BoolToVis}}"/>
             </StackPanel>
