@@ -1,0 +1,74 @@
+{
+  "scan": {
+    "scan_id": 4,
+    "subnet": "192.168.1.0/24",
+    "ts_start": "2026-02-19T15:27:16.405896Z",
+    "ts_end": "2026-02-19T15:27:56.227783Z",
+    "host_count": 7
+  },
+  "devices": [
+    {
+      "ip": "192.168.1.1",
+      "mac": "34:36:54:AE:00:2A",
+      "hostname": null,
+      "vendor": null,
+      "first_seen": "2026-02-19T13:45:37.087123Z",
+      "last_seen": "2026-02-19T15:27:55.498860Z",
+      "is_new": false
+    },
+    {
+      "ip": "192.168.1.2",
+      "mac": "CC:BA:BD:73:DA:4D",
+      "hostname": null,
+      "vendor": null,
+      "first_seen": "2026-02-19T13:45:37.096985Z",
+      "last_seen": "2026-02-19T15:27:56.088185Z",
+      "is_new": false
+    },
+    {
+      "ip": "192.168.1.3",
+      "mac": "00:5F:67:E8:67:18",
+      "hostname": null,
+      "vendor": null,
+      "first_seen": "2026-02-19T13:45:37.105509Z",
+      "last_seen": "2026-02-19T15:27:56.119458Z",
+      "is_new": false
+    },
+    {
+      "ip": "192.168.1.10",
+      "mac": "8C:7A:B3:8B:5B:85",
+      "hostname": null,
+      "vendor": null,
+      "first_seen": "2026-02-19T13:45:37.124104Z",
+      "last_seen": "2026-02-19T15:27:56.141189Z",
+      "is_new": false
+    },
+    {
+      "ip": "192.168.1.13",
+      "mac": "2E:33:67:4A:BA:0A",
+      "hostname": null,
+      "vendor": null,
+      "first_seen": "2026-02-19T13:45:37.134013Z",
+      "last_seen": "2026-02-19T15:27:56.149729Z",
+      "is_new": false
+    },
+    {
+      "ip": "192.168.1.16",
+      "mac": "4E:3C:6E:51:F1:12",
+      "hostname": null,
+      "vendor": null,
+      "first_seen": "2026-02-19T13:45:37.143833Z",
+      "last_seen": "2026-02-19T15:27:56.171202Z",
+      "is_new": false
+    },
+    {
+      "ip": "192.168.1.17",
+      "mac": "FE:C2:79:38:E9:04",
+      "hostname": null,
+      "vendor": null,
+      "first_seen": "2026-02-19T14:20:25.130581Z",
+      "last_seen": "2026-02-19T15:27:56.218473Z",
+      "is_new": false
+    }
+  ]
+}
