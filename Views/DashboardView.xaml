@@ -566,7 +566,6 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
@@ -687,7 +686,7 @@
             </Border>
 
             <!-- Device Table -->
-            <Border Grid.Row="4" Margin="20,12,20,20"
+            <Border Grid.Row="3" Margin="20,14,20,20"
                     Background="{DynamicResource Bg.Surface}"
                     CornerRadius="10"
                     BorderBrush="{DynamicResource Border.Primary}"
