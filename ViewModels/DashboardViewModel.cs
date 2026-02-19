@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,12 +20,14 @@ namespace UyKonek.ViewModels
         private string _statusMessage = "Ready to scan";
         private string? _errorMessage;
         private bool _isDark = true;
+        private bool _backendOnline = true;
 
         public DashboardViewModel(ApiClientService apiClientService, SettingsService settingsService)
         {
             _apiClientService = apiClientService;
             BackendUrl = settingsService.BackendBaseUrl;
             Devices = new ObservableCollection<DeviceModel>();
+            Devices.CollectionChanged += OnDevicesCollectionChanged;
 
             ScanCommand = new AsyncRelayCommand(ScanAsync, () => !IsScanning);
             CancelCommand = new AsyncRelayCommand(CancelAsync, () => IsScanning);
@@ -75,6 +79,8 @@ namespace UyKonek.ViewModels
                 {
                     ScanCommand.RaiseCanExecuteChanged();
                     CancelCommand.RaiseCanExecuteChanged();
+                    OnPropertyChanged(nameof(ScanStatusLabel));
+                    OnPropertyChanged(nameof(ScanStatusDetail));
                 }
             }
         }
@@ -88,8 +94,41 @@ namespace UyKonek.ViewModels
         public string? ErrorMessage
         {
             get => _errorMessage;
-            private set => SetProperty(ref _errorMessage, value);
+            private set
+            {
+                if (SetProperty(ref _errorMessage, value))
+                {
+                    OnPropertyChanged(nameof(ScanStatusLabel));
+                    OnPropertyChanged(nameof(ScanStatusDetail));
+                }
+            }
         }
+
+        public int NewDevicesCount => Devices.Count(d => d.IsNew);
+
+        public string ScanStatusLabel
+        {
+            get
+            {
+                if (IsScanning) return "SCANNING";
+                if (!string.IsNullOrWhiteSpace(ErrorMessage)) return "ERROR";
+                if (Devices.Count > 0) return "COMPLETE";
+                return "IDLE";
+            }
+        }
+
+        public string ScanStatusDetail
+        {
+            get
+            {
+                if (IsScanning) return "discovering devices";
+                if (!string.IsNullOrWhiteSpace(ErrorMessage)) return "scan failed";
+                if (Devices.Count > 0) return $"{Devices.Count} discovered device(s)";
+                return "ready to scan";
+            }
+        }
+
+        public string BackendStatusLabel => _backendOnline ? "ONLINE" : "OFFLINE";
 
         public DeviceModel? SelectedDevice { get; set; }
 
@@ -109,6 +148,8 @@ namespace UyKonek.ViewModels
                 foreach (var device in result.Devices)
                     Devices.Add(device);
 
+                _backendOnline = true;
+                OnPropertyChanged(nameof(BackendStatusLabel));
                 StatusMessage = $"Scan {result.Scan.ScanId} complete: {result.Scan.HostCount} hosts discovered";
             }
             catch (OperationCanceledException)
@@ -117,6 +158,8 @@ namespace UyKonek.ViewModels
             }
             catch (Exception ex)
             {
+                _backendOnline = false;
+                OnPropertyChanged(nameof(BackendStatusLabel));
                 ErrorMessage = ex.Message + "\nTip: Start backend with `uvicorn app.main:app --port 8787`";
                 StatusMessage = "Scan failed";
             }
@@ -158,6 +201,13 @@ namespace UyKonek.ViewModels
         {
             App.ThemeService.Toggle();
             return Task.CompletedTask;
+        }
+
+        private void OnDevicesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged(nameof(NewDevicesCount));
+            OnPropertyChanged(nameof(ScanStatusLabel));
+            OnPropertyChanged(nameof(ScanStatusDetail));
         }
 
         // ── INotifyPropertyChanged ───────────────────────────────

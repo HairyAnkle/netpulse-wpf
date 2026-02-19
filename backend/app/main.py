@@ -19,7 +19,10 @@ app = FastAPI(title="NetPulse API", version="0.1.0")
 base_dir = Path(__file__).resolve().parents[1]
 db = Database(base_dir / "data" / "netpulse.db")
 scanner = NetworkScannerService()
-oui = OuiLookupService(base_dir / "data" / "oui_sample.csv")
+oui_file = base_dir / "data" / "oui.json"
+if not oui_file.exists():
+    oui_file = base_dir / "data" / "oui_sample.csv"
+oui = OuiLookupService(oui_file)
 run_dir = base_dir / "runs"
 run_dir.mkdir(parents=True, exist_ok=True)
 
