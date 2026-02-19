@@ -647,6 +647,44 @@
                 </Border>
             </UniformGrid>
 
+
+            <!-- Quick Tools (placeholder for next phase) -->
+            <Border Grid.Row="3" Margin="20,14,20,0"
+                    Background="{DynamicResource Bg.Surface}"
+                    CornerRadius="10"
+                    BorderBrush="{DynamicResource Border.Primary}"
+                    BorderThickness="1" Padding="16,14">
+                <StackPanel>
+                    <TextBlock Text="QUICK TOOLS" Style="{StaticResource SectionHeader}" Margin="0,0,0,12"/>
+                    <UniformGrid Columns="7" Rows="1">
+                        <Button Style="{StaticResource FeatureCard}" Margin="0,0,5,0" IsEnabled="False">
+                            <Border Padding="8,12"><StackPanel HorizontalAlignment="Center"><TextBlock Text="◎" Foreground="{DynamicResource Color.Accent}" FontSize="20" HorizontalAlignment="Center"/><TextBlock Text="PING" Foreground="{DynamicResource Text.Nav}" FontFamily="Consolas" FontSize="9" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,6,0,0"/></StackPanel></Border>
+                        </Button>
+                        <Button Style="{StaticResource FeatureCard}" Margin="3,0" IsEnabled="False">
+                            <Border Padding="8,12"><StackPanel HorizontalAlignment="Center"><TextBlock Text="⤳" Foreground="{DynamicResource Color.Purple}" FontSize="20" HorizontalAlignment="Center"/><TextBlock Text="ROUTE" Foreground="{DynamicResource Text.Nav}" FontFamily="Consolas" FontSize="9" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,6,0,0"/></StackPanel></Border>
+                        </Button>
+                        <Button Style="{StaticResource FeatureCard}" Margin="3,0" IsEnabled="False">
+                            <Border Padding="8,12"><StackPanel HorizontalAlignment="Center"><TextBlock Text="⬡" Foreground="{DynamicResource Color.Warning}" FontSize="20" HorizontalAlignment="Center"/><TextBlock Text="PORTS" Foreground="{DynamicResource Text.Nav}" FontFamily="Consolas" FontSize="9" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,6,0,0"/></StackPanel></Border>
+                        </Button>
+                        <Button Style="{StaticResource FeatureCard}" Margin="3,0" IsEnabled="False">
+                            <Border Padding="8,12"><StackPanel HorizontalAlignment="Center"><TextBlock Text="▶" Foreground="{DynamicResource Color.Success}" FontSize="18" HorizontalAlignment="Center"/><TextBlock Text="SPEED" Foreground="{DynamicResource Text.Nav}" FontFamily="Consolas" FontSize="9" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,6,0,0"/></StackPanel></Border>
+                        </Button>
+                        <Button Style="{StaticResource FeatureCard}" Margin="3,0" IsEnabled="False">
+                            <Border Padding="8,12"><StackPanel HorizontalAlignment="Center"><TextBlock Text="◉" Foreground="{DynamicResource Color.Danger}" FontSize="20" HorizontalAlignment="Center"/><TextBlock Text="CAMERAS" Foreground="{DynamicResource Text.Nav}" FontFamily="Consolas" FontSize="9" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,6,0,0"/></StackPanel></Border>
+                        </Button>
+                        <Button Style="{StaticResource FeatureCard}" Margin="3,0" IsEnabled="False">
+                            <Border Padding="8,12"><StackPanel HorizontalAlignment="Center"><TextBlock Text="⏻" Foreground="{DynamicResource Color.Blue}" FontSize="20" HorizontalAlignment="Center"/><TextBlock Text="WAKE" Foreground="{DynamicResource Text.Nav}" FontFamily="Consolas" FontSize="9" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,6,0,0"/></StackPanel></Border>
+                        </Button>
+                        <Button Style="{StaticResource FeatureCard}" Margin="5,0,0,0" IsEnabled="False">
+                            <Border Padding="8,12"><StackPanel HorizontalAlignment="Center"><TextBlock Text="⟺" Foreground="{DynamicResource Color.Pink}" FontSize="18" HorizontalAlignment="Center"/><TextBlock Text="ISP" Foreground="{DynamicResource Text.Nav}" FontFamily="Consolas" FontSize="9" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,6,0,0"/></StackPanel></Border>
+                        </Button>
+                    </UniformGrid>
+                    <TextBlock Text="Quick tools will be enabled in the next feature phase."
+                               Foreground="{DynamicResource Text.Muted}"
+                               FontFamily="Consolas" FontSize="10" Margin="0,12,0,0"/>
+                </StackPanel>
+            </Border>
+
             <!-- Device Table -->
             <Border Grid.Row="3" Margin="20,14,20,20"
                     Background="{DynamicResource Bg.Surface}"
@@ -730,7 +768,7 @@
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="HOSTNAME" Binding="{Binding Hostname}" Width="1.6*">
+                            <DataGridTextColumn Header="HOSTNAME" Binding="{Binding Hostname, TargetNullValue=—, FallbackValue=—}" Width="1.6*">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Foreground"        Value="{DynamicResource Text.TableHost}"/>
@@ -741,7 +779,7 @@
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="VENDOR" Binding="{Binding Vendor}" Width="1.6*">
+                            <DataGridTextColumn Header="VENDOR" Binding="{Binding Vendor, TargetNullValue=UNKNOWN, FallbackValue=UNKNOWN}" Width="1.6*">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Foreground"        Value="{DynamicResource Text.TableVendor}"/>

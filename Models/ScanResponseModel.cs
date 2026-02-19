@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace UyKonek.Models
 {
@@ -14,11 +12,18 @@ namespace UyKonek.Models
 
     public sealed class ScanMetadataModel
     {
+        [JsonPropertyName("scan_id")]
         public int ScanId { get; set; }
+
         public string Subnet { get; set; } = string.Empty;
+
+        [JsonPropertyName("ts_start")]
         public DateTimeOffset TsStart { get; set; }
+
+        [JsonPropertyName("ts_end")]
         public DateTimeOffset TsEnd { get; set; }
+
+        [JsonPropertyName("host_count")]
         public int HostCount { get; set; }
     }
-
 }
