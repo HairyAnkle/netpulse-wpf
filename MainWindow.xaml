@@ -2,11 +2,130 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:views="clr-namespace:UyKonek.Views"
-        Title="NetPulse" Height="720" Width="1200"
-        MinHeight="600" MinWidth="960"
+        Title="UyKonek — Network Intelligence"
+        Height="820" Width="1340"
+        MinHeight="680" MinWidth="1100"
         WindowStartupLocation="CenterScreen"
-        Background="#0F172A">
-    <Grid Margin="12">
-        <views:DashboardView />
-    </Grid>
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="CanResizeWithGrip">
+
+    <Window.Resources>
+        <Style x:Key="WinBtn" TargetType="Button">
+            <Setter Property="Background"      Value="Transparent"/>
+            <Setter Property="Foreground"      Value="{DynamicResource Text.Nav}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontFamily"      Value="Segoe UI Symbol"/>
+            <Setter Property="FontSize"        Value="11"/>
+            <Setter Property="Width"           Value="40"/>
+            <Setter Property="Height"          Value="32"/>
+            <Setter Property="Cursor"          Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Bg.NavHover}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource Color.Accent}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="CloseBtn" TargetType="Button" BasedOn="{StaticResource WinBtn}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Bg.TagError}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource Color.Danger}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Border CornerRadius="12" ClipToBounds="True"
+            Background="{DynamicResource Bg.Window}">
+        <Border.Effect>
+            <DropShadowEffect Color="#000000" BlurRadius="60" ShadowDepth="0" Opacity="0.8"/>
+        </Border.Effect>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Title Bar -->
+            <Border Grid.Row="0"
+                    Background="{DynamicResource Bg.TitleBar}"
+                    BorderBrush="{DynamicResource Border.Primary}"
+                    BorderThickness="0,0,0,1"
+                    MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <Grid Margin="12,0,6,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Logo -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Canvas Width="20" Height="20" VerticalAlignment="Center" Margin="0,0,10,0">
+                            <Ellipse Canvas.Left="2"  Canvas.Top="2"  Width="16" Height="16"
+                                     Stroke="{DynamicResource Border.Card}" StrokeThickness="1"/>
+                            <Ellipse Canvas.Left="6"  Canvas.Top="6"  Width="8"  Height="8"
+                                     Stroke="{DynamicResource Border.Card}" StrokeThickness="1"/>
+                            <Ellipse Canvas.Left="8.5" Canvas.Top="8.5" Width="3" Height="3"
+                                     Fill="{DynamicResource Color.Accent}">
+                                <Ellipse.Effect>
+                                    <DropShadowEffect Color="#00E5FF" BlurRadius="6" ShadowDepth="0"/>
+                                </Ellipse.Effect>
+                            </Ellipse>
+                        </Canvas>
+                        <TextBlock Text="UYKONEK"
+                                   Foreground="{DynamicResource Text.Primary}"
+                                   FontFamily="Consolas" FontSize="12" FontWeight="Bold"
+                                   VerticalAlignment="Center"/>
+                        <Border Background="{DynamicResource Bg.TagNew}"
+                                CornerRadius="3" Padding="6,2"
+                                Margin="10,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="BETA"
+                                       Foreground="{DynamicResource Color.Success}"
+                                       FontFamily="Consolas" FontSize="9" FontWeight="Bold"/>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Status pill -->
+                    <Border Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Background="{DynamicResource Bg.Input}" CornerRadius="20" Padding="14,4">
+                        <TextBlock Text="{Binding StatusMessage}"
+                                   Foreground="{DynamicResource Text.StatusBar}"
+                                   FontFamily="Consolas" FontSize="10"/>
+                    </Border>
+
+                    <!-- Window controls -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button Style="{StaticResource WinBtn}"   Content="─" Click="MinimizeWindow_Click"/>
+                        <Button Style="{StaticResource WinBtn}"   Content="⬜" Click="MaximizeWindow_Click"/>
+                        <Button Style="{StaticResource CloseBtn}" Content="✕"  Click="CloseWindow_Click"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <views:DashboardView Grid.Row="1"/>
+        </Grid>
+    </Border>
 </Window>

@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using UyKonek.Commands;
 using UyKonek.Models;
@@ -19,27 +17,54 @@ namespace UyKonek.ViewModels
         private bool _isScanning;
         private string _statusMessage = "Ready to scan";
         private string? _errorMessage;
+        private bool _isDark = true;
 
         public DashboardViewModel(ApiClientService apiClientService, SettingsService settingsService)
         {
             _apiClientService = apiClientService;
             BackendUrl = settingsService.BackendBaseUrl;
             Devices = new ObservableCollection<DeviceModel>();
+
             ScanCommand = new AsyncRelayCommand(ScanAsync, () => !IsScanning);
             CancelCommand = new AsyncRelayCommand(CancelAsync, () => IsScanning);
             CopyIpCommand = new AsyncRelayCommand(CopyIpAsync);
             CopyMacCommand = new AsyncRelayCommand(CopyMacAsync);
+            ToggleThemeCommand = new AsyncRelayCommand(ToggleThemeAsync);
+
+            // Sync initial state with ThemeService
+            _isDark = App.ThemeService.IsDark;
+            App.ThemeService.ThemeChanged += () =>
+            {
+                _isDark = App.ThemeService.IsDark;
+                OnPropertyChanged(nameof(IsDark));
+                OnPropertyChanged(nameof(ThemeIcon));
+                OnPropertyChanged(nameof(ThemeLabel));
+            };
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public ObservableCollection<DeviceModel> Devices { get; }
+
         public AsyncRelayCommand ScanCommand { get; }
         public AsyncRelayCommand CancelCommand { get; }
         public AsyncRelayCommand CopyIpCommand { get; }
         public AsyncRelayCommand CopyMacCommand { get; }
+        public AsyncRelayCommand ToggleThemeCommand { get; }
 
         public string BackendUrl { get; }
+
+        public bool IsDark
+        {
+            get => _isDark;
+            private set => SetProperty(ref _isDark, value);
+        }
+
+        /// <summary>Icon shown on the toggle button (sun in dark, moon in light).</summary>
+        public string ThemeIcon => _isDark ? "☀" : "☾";
+
+        /// <summary>Tooltip/label for the toggle button.</summary>
+        public string ThemeLabel => _isDark ? "LIGHT MODE" : "DARK MODE";
 
         public bool IsScanning
         {
@@ -68,6 +93,8 @@ namespace UyKonek.ViewModels
 
         public DeviceModel? SelectedDevice { get; set; }
 
+        // ── Commands ────────────────────────────────────────────
+
         private async Task ScanAsync()
         {
             IsScanning = true;
@@ -80,9 +107,7 @@ namespace UyKonek.ViewModels
             {
                 var result = await _apiClientService.ScanDevicesAsync(_scanCts.Token);
                 foreach (var device in result.Devices)
-                {
                     Devices.Add(device);
-                }
 
                 StatusMessage = $"Scan {result.Scan.ScanId} complete: {result.Scan.HostCount} hosts discovered";
             }
@@ -116,7 +141,6 @@ namespace UyKonek.ViewModels
                 System.Windows.Clipboard.SetText(SelectedDevice.Ip);
                 StatusMessage = $"Copied IP {SelectedDevice.Ip}";
             }
-
             return Task.CompletedTask;
         }
 
@@ -127,20 +151,26 @@ namespace UyKonek.ViewModels
                 System.Windows.Clipboard.SetText(SelectedDevice.Mac);
                 StatusMessage = $"Copied MAC {SelectedDevice.Mac}";
             }
-
             return Task.CompletedTask;
         }
 
+        private Task ToggleThemeAsync()
+        {
+            App.ThemeService.Toggle();
+            return Task.CompletedTask;
+        }
+
+        // ── INotifyPropertyChanged ───────────────────────────────
+
         private bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string? propertyName = null)
         {
-            if (Equals(storage, value))
-            {
-                return false;
-            }
-
+            if (Equals(storage, value)) return false;
             storage = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            OnPropertyChanged(propertyName);
             return true;
         }
+
+        private void OnPropertyChanged(string? propertyName)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

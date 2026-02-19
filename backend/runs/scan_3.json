@@ -1,0 +1,83 @@
+{
+  "scan": {
+    "scan_id": 3,
+    "subnet": "192.168.1.0/24",
+    "ts_start": "2026-02-19T14:35:01.949399Z",
+    "ts_end": "2026-02-19T14:35:43.573140Z",
+    "host_count": 8
+  },
+  "devices": [
+    {
+      "ip": "192.168.1.1",
+      "mac": "34:36:54:AE:00:2A",
+      "hostname": null,
+      "vendor": null,
+      "first_seen": "2026-02-19T13:45:37.087123Z",
+      "last_seen": "2026-02-19T14:35:43.497035Z",
+      "is_new": false
+    },
+    {
+      "ip": "192.168.1.2",
+      "mac": "CC:BA:BD:73:DA:4D",
+      "hostname": null,
+      "vendor": null,
+      "first_seen": "2026-02-19T13:45:37.096985Z",
+      "last_seen": "2026-02-19T14:35:43.507009Z",
+      "is_new": false
+    },
+    {
+      "ip": "192.168.1.3",
+      "mac": "00:5F:67:E8:67:18",
+      "hostname": null,
+      "vendor": null,
+      "first_seen": "2026-02-19T13:45:37.105509Z",
+      "last_seen": "2026-02-19T14:35:43.516643Z",
+      "is_new": false
+    },
+    {
+      "ip": "192.168.1.5",
+      "mac": "9A:F2:93:72:AD:39",
+      "hostname": null,
+      "vendor": null,
+      "first_seen": "2026-02-19T13:45:37.114190Z",
+      "last_seen": "2026-02-19T14:35:43.525998Z",
+      "is_new": false
+    },
+    {
+      "ip": "192.168.1.10",
+      "mac": "8C:7A:B3:8B:5B:85",
+      "hostname": null,
+      "vendor": null,
+      "first_seen": "2026-02-19T13:45:37.124104Z",
+      "last_seen": "2026-02-19T14:35:43.535219Z",
+      "is_new": false
+    },
+    {
+      "ip": "192.168.1.13",
+      "mac": "2E:33:67:4A:BA:0A",
+      "hostname": null,
+      "vendor": null,
+      "first_seen": "2026-02-19T13:45:37.134013Z",
+      "last_seen": "2026-02-19T14:35:43.544590Z",
+      "is_new": false
+    },
+    {
+      "ip": "192.168.1.16",
+      "mac": "4E:3C:6E:51:F1:12",
+      "hostname": null,
+      "vendor": null,
+      "first_seen": "2026-02-19T13:45:37.143833Z",
+      "last_seen": "2026-02-19T14:35:43.553953Z",
+      "is_new": false
+    },
+    {
+      "ip": "192.168.1.22",
+      "mac": "A8:23:FE:21:21:46",
+      "hostname": null,
+      "vendor": null,
+      "first_seen": "2026-02-19T13:45:37.162604Z",
+      "last_seen": "2026-02-19T14:35:43.563518Z",
+      "is_new": false
+    }
+  ]
+}

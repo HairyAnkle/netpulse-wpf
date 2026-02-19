@@ -1,0 +1,83 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ═══════════════════════════════════════════════
+         LIGHT THEME — Clean slate + ocean blue accent
+         ═══════════════════════════════════════════════ -->
+
+    <!-- Core backgrounds -->
+    <SolidColorBrush x:Key="Bg.Window"          Color="#F0F4F8"/>
+    <SolidColorBrush x:Key="Bg.TitleBar"        Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="Bg.Sidebar"         Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="Bg.Card"            Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="Bg.CardAlt"         Color="#F8FAFC"/>
+    <SolidColorBrush x:Key="Bg.Surface"         Color="#F8FAFC"/>
+    <SolidColorBrush x:Key="Bg.Input"           Color="#EEF2F7"/>
+    <SolidColorBrush x:Key="Bg.RowEven"         Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="Bg.RowOdd"          Color="#F8FAFC"/>
+    <SolidColorBrush x:Key="Bg.RowHover"        Color="#EEF6FF"/>
+    <SolidColorBrush x:Key="Bg.RowSelected"     Color="#DBEAFE"/>
+    <SolidColorBrush x:Key="Bg.NavHover"        Color="#F0F4F8"/>
+    <SolidColorBrush x:Key="Bg.NavActive"       Color="#E8F4FF"/>
+    <SolidColorBrush x:Key="Bg.TagNew"          Color="#ECFDF5"/>
+    <SolidColorBrush x:Key="Bg.TagError"        Color="#FFF1F2"/>
+    <SolidColorBrush x:Key="Bg.ThemeToggle"     Color="#EEF2F7"/>
+
+    <!-- Borders -->
+    <SolidColorBrush x:Key="Border.Primary"     Color="#E2E8F0"/>
+    <SolidColorBrush x:Key="Border.Subtle"      Color="#CBD5E1"/>
+    <SolidColorBrush x:Key="Border.Card"        Color="#E2E8F0"/>
+    <SolidColorBrush x:Key="Border.Error"       Color="#FECDD3"/>
+    <SolidColorBrush x:Key="Border.GhostBtn"    Color="#CBD5E1"/>
+    <SolidColorBrush x:Key="Border.DangerBtn"   Color="#FECDD3"/>
+
+    <!-- Text -->
+    <SolidColorBrush x:Key="Text.Primary"       Color="#0F172A"/>
+    <SolidColorBrush x:Key="Text.Secondary"     Color="#475569"/>
+    <SolidColorBrush x:Key="Text.Muted"         Color="#94A3B8"/>
+    <SolidColorBrush x:Key="Text.Dim"           Color="#CBD5E1"/>
+    <SolidColorBrush x:Key="Text.Nav"           Color="#64748B"/>
+    <SolidColorBrush x:Key="Text.NavHover"      Color="#1E40AF"/>
+    <SolidColorBrush x:Key="Text.StatusBar"     Color="#64748B"/>
+    <SolidColorBrush x:Key="Text.TableIp"       Color="#0369A1"/>
+    <SolidColorBrush x:Key="Text.TableMac"      Color="#475569"/>
+    <SolidColorBrush x:Key="Text.TableHost"     Color="#1E293B"/>
+    <SolidColorBrush x:Key="Text.TableVendor"   Color="#64748B"/>
+    <SolidColorBrush x:Key="Text.TableTime"     Color="#94A3B8"/>
+    <SolidColorBrush x:Key="Text.GhostBtn"      Color="#475569"/>
+    <SolidColorBrush x:Key="Text.DangerBtn"     Color="#BE123C"/>
+    <SolidColorBrush x:Key="Text.Error"         Color="#BE123C"/>
+    <SolidColorBrush x:Key="Text.EmptyState"    Color="#94A3B8"/>
+    <SolidColorBrush x:Key="Text.EmptySub"      Color="#CBD5E1"/>
+    <SolidColorBrush x:Key="Text.ThemeIcon"     Color="#64748B"/>
+
+    <!-- Semantic colors -->
+    <SolidColorBrush x:Key="Color.Accent"       Color="#0284C7"/>
+    <SolidColorBrush x:Key="Color.Success"      Color="#059669"/>
+    <SolidColorBrush x:Key="Color.Warning"      Color="#D97706"/>
+    <SolidColorBrush x:Key="Color.Danger"       Color="#E11D48"/>
+    <SolidColorBrush x:Key="Color.Purple"       Color="#7C3AED"/>
+    <SolidColorBrush x:Key="Color.Blue"         Color="#2563EB"/>
+    <SolidColorBrush x:Key="Color.Pink"         Color="#DB2777"/>
+
+    <!-- Empty-state radar strokes -->
+    <SolidColorBrush x:Key="Color.RadarRing"    Color="#E2E8F0"/>
+
+    <!-- Grid line -->
+    <SolidColorBrush x:Key="Color.GridLine"     Color="#E2E8F0"/>
+
+    <!-- Column header -->
+    <SolidColorBrush x:Key="Bg.ColHeader"       Color="#F8FAFC"/>
+    <SolidColorBrush x:Key="Text.ColHeader"     Color="#94A3B8"/>
+
+    <!-- Progress bar -->
+    <SolidColorBrush x:Key="Bg.ProgressTrack"   Color="#E2E8F0"/>
+
+    <!-- Scrollbar thumb -->
+    <SolidColorBrush x:Key="Color.ScrollThumb"  Color="#CBD5E1"/>
+
+    <!-- Theme toggle icon -->
+    <System:String x:Key="ThemeIcon"            xmlns:System="clr-namespace:System;assembly=mscorlib">☾</System:String>
+    <System:String x:Key="ThemeLabel"           xmlns:System="clr-namespace:System;assembly=mscorlib">DARK MODE</System:String>
+
+</ResourceDictionary>
