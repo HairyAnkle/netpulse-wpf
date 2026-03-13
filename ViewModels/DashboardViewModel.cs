@@ -150,7 +150,7 @@ namespace UyKonek.ViewModels
 
                 _backendOnline = true;
                 OnPropertyChanged(nameof(BackendStatusLabel));
-                StatusMessage = $"Scan {result.Scan.ScanId} complete: {result.Scan.HostCount} hosts discovered";
+                StatusMessage = $"Scan complete: {result.Scan.HostCount} hosts discovered";
             }
             catch (OperationCanceledException)
             {
@@ -160,7 +160,7 @@ namespace UyKonek.ViewModels
             {
                 _backendOnline = false;
                 OnPropertyChanged(nameof(BackendStatusLabel));
-                ErrorMessage = ex.Message + "\nTip: Start backend with `uvicorn app.main:app --port 8787`";
+                ErrorMessage = ex.Message + "\nTip: Start Go backend with `cd uykonek-go-backend && go run main.go`";
                 StatusMessage = "Scan failed";
             }
             finally
