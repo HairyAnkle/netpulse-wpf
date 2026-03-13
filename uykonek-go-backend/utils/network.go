@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"strings"
 )
 
 func GetLocalIPv4AndSubnet() (net.IP, *net.IPNet, error) {
@@ -12,6 +13,14 @@ func GetLocalIPv4AndSubnet() (net.IP, *net.IPNet, error) {
 	if err != nil {
 		return nil, nil, err
 	}
+
+	type candidate struct {
+		ip      net.IP
+		name    string
+		score   int
+		network *net.IPNet
+	}
+	best := candidate{score: -1}
 
 	for _, iface := range ifaces {
 		if iface.Flags&net.FlagUp == 0 || iface.Flags&net.FlagLoopback != 0 {
@@ -34,13 +43,60 @@ func GetLocalIPv4AndSubnet() (net.IP, *net.IPNet, error) {
 				continue
 			}
 
-			mask := net.CIDRMask(24, 32)
-			network := net.IPNet{IP: ip.Mask(mask), Mask: mask}
-			return ip, &network, nil
+			score := scoreInterface(iface.Name, ip)
+			if score > best.score {
+				mask := net.CIDRMask(24, 32)
+				network := net.IPNet{IP: ip.Mask(mask), Mask: mask}
+				best = candidate{ip: ip, name: iface.Name, score: score, network: &network}
+			}
 		}
 	}
 
-	return nil, nil, errors.New("no active IPv4 interface found")
+	if best.score < 0 {
+		return nil, nil, errors.New("no active IPv4 interface found")
+	}
+	return best.ip, best.network, nil
+}
+
+func scoreInterface(name string, ip net.IP) int {
+	score := 0
+	lname := strings.ToLower(name)
+
+	if isPrivateIPv4(ip) {
+		score += 100
+	}
+
+	virtualHints := []string{"docker", "veth", "virtual", "vmware", "vmnet", "vbox", "hyper-v", "vethernet", "wsl", "tailscale", "zt"}
+	for _, h := range virtualHints {
+		if strings.Contains(lname, h) {
+			score -= 50
+			break
+		}
+	}
+
+	preferredHints := []string{"eth", "en", "wlan", "wi-fi", "wifi", "lan"}
+	for _, h := range preferredHints {
+		if strings.Contains(lname, h) {
+			score += 10
+			break
+		}
+	}
+
+	if ip[0] == 169 && ip[1] == 254 { // APIPA typically not useful for LAN scan
+		score -= 100
+	}
+
+	return score
+}
+
+func isPrivateIPv4(ip net.IP) bool {
+	v4 := ip.To4()
+	if v4 == nil {
+		return false
+	}
+	return v4[0] == 10 ||
+		(v4[0] == 172 && v4[1] >= 16 && v4[1] <= 31) ||
+		(v4[0] == 192 && v4[1] == 168)
 }
 
 func HostsInSubnet(ipNet *net.IPNet) ([]string, error) {
