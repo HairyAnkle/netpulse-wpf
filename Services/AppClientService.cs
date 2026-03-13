@@ -26,7 +26,7 @@ namespace UyKonek.Services
 
         public async Task<ScanResponseModel> ScanDevicesAsync(CancellationToken cancellationToken)
         {
-            using var request = new HttpRequestMessage(HttpMethod.Post, $"{_settingsService.BackendBaseUrl}/scan/devices");
+            using var request = new HttpRequestMessage(HttpMethod.Get, $"{_settingsService.BackendBaseUrl}/scan/network");
             using var response = await _httpClient.SendAsync(request, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
@@ -35,11 +35,29 @@ namespace UyKonek.Services
                 throw new InvalidOperationException($"Backend returned {(int)response.StatusCode}: {body}");
             }
 
-            var scan = await response.Content.ReadFromJsonAsync<ScanResponseModel>(
+            var devices = await response.Content.ReadFromJsonAsync<List<DeviceModel>>(
                 new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase },
-                cancellationToken);
+                cancellationToken) ?? new List<DeviceModel>();
 
-            return scan ?? new ScanResponseModel();
+            var now = DateTimeOffset.UtcNow;
+            return new ScanResponseModel
+            {
+                Devices = devices,
+                Scan = new ScanMetadataModel
+                {
+                    ScanId = BuildScanId(now),
+                    Subnet = "local-network",
+                    TsStart = now,
+                    TsEnd = now,
+                    HostCount = devices.Count,
+                }
+            };
+        }
+
+        private static int BuildScanId(DateTimeOffset timestamp)
+        {
+            var id = timestamp.ToUnixTimeSeconds();
+            return id > int.MaxValue ? int.MaxValue : (int)id;
         }
     }
 }
