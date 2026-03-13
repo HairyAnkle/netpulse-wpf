@@ -75,7 +75,7 @@ func (s *ARPScanner) ScanSubnet(ctx context.Context, hosts []string) []models.De
 	}
 
 	for ip, mac := range arpTable {
-		if _, ok := seen[ip]; ok || mac == "" {
+		if _, ok := seen[ip]; ok || mac == "" || isBroadcastIP(ip) || strings.EqualFold(mac, "FF:FF:FF:FF:FF:FF") {
 			continue
 		}
 		hostname := resolveHostname(ip)
@@ -95,7 +95,7 @@ func (s *ARPScanner) ScanSubnet(ctx context.Context, hosts []string) []models.De
 
 func (s *ARPScanner) scanHost(ctx context.Context, ip string, arpTable map[string]string) (models.Device, bool) {
 	mac := arpTable[ip]
-	alive := mac != ""
+	alive := mac != "" && !strings.EqualFold(mac, "FF:FF:FF:FF:FF:FF")
 
 	result := s.pingService.Ping(ctx, ip)
 	if result.Alive {
@@ -112,6 +112,9 @@ func (s *ARPScanner) scanHost(ctx context.Context, ip string, arpTable map[strin
 	vendor := s.vendor.Lookup(mac)
 
 	log.Printf("Discovered device %s", ip)
+	if isBroadcastIP(ip) {
+		return models.Device{}, false
+	}
 	return models.Device{Ip: ip, Mac: mac, Hostname: hostname, Vendor: vendor}, true
 }
 
@@ -218,6 +221,18 @@ func normalizeMAC(mac string) string {
 		return ""
 	}
 	return strings.Join([]string{m[0:2], m[2:4], m[4:6], m[6:8], m[8:10], m[10:12]}, ":")
+}
+
+func isBroadcastIP(ip string) bool {
+	parsed := net.ParseIP(strings.TrimSpace(ip))
+	if parsed == nil {
+		return false
+	}
+	v4 := parsed.To4()
+	if v4 == nil {
+		return false
+	}
+	return v4[3] == 255
 }
 
 func warmARP(ctx context.Context, hosts []string) {
