@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"os/exec"
 	"sort"
 	"strings"
 	"sync"
@@ -25,7 +26,6 @@ func NewARPScanner(workers int, pingService *PingService, vendor *utils.VendorLo
 }
 
 func (s *ARPScanner) ScanSubnet(ctx context.Context, hosts []string) []models.Device {
-	// Trigger lightweight UDP probes first to populate local ARP cache.
 	warmARP(ctx, hosts)
 	arpTable := readARPTable()
 
@@ -74,12 +74,8 @@ func (s *ARPScanner) ScanSubnet(ctx context.Context, hosts []string) []models.De
 		devices = append(devices, d)
 	}
 
-	// Fallback: if ping probing misses passive devices, keep ARP-learned hosts.
 	for ip, mac := range arpTable {
-		if _, ok := seen[ip]; ok {
-			continue
-		}
-		if mac == "" {
+		if _, ok := seen[ip]; ok || mac == "" {
 			continue
 		}
 		hostname := resolveHostname(ip)
@@ -116,12 +112,7 @@ func (s *ARPScanner) scanHost(ctx context.Context, ip string, arpTable map[strin
 	vendor := s.vendor.Lookup(mac)
 
 	log.Printf("Discovered device %s", ip)
-	return models.Device{
-		Ip:       ip,
-		Mac:      mac,
-		Hostname: hostname,
-		Vendor:   vendor,
-	}, true
+	return models.Device{Ip: ip, Mac: mac, Hostname: hostname, Vendor: vendor}, true
 }
 
 func resolveHostname(ip string) string {
@@ -133,11 +124,20 @@ func resolveHostname(ip string) string {
 }
 
 func readARPEntry(ip string) string {
-	arp := readARPTable()
-	return arp[ip]
+	return readARPTable()[ip]
 }
 
 func readARPTable() map[string]string {
+	if entries := readARPProc(); len(entries) > 0 {
+		return entries
+	}
+	if entries := readARPByCommand(); len(entries) > 0 {
+		return entries
+	}
+	return map[string]string{}
+}
+
+func readARPProc() map[string]string {
 	f, err := os.Open("/proc/net/arp")
 	if err != nil {
 		return map[string]string{}
@@ -157,13 +157,67 @@ func readARPTable() map[string]string {
 			continue
 		}
 		ip := fields[0]
-		mac := strings.ToUpper(fields[3])
-		if mac == "00:00:00:00:00:00" {
-			continue
+		mac := normalizeMAC(fields[3])
+		if mac != "" {
+			entries[ip] = mac
 		}
-		entries[ip] = mac
 	}
 	return entries
+}
+
+func readARPByCommand() map[string]string {
+	cmd := exec.Command("arp", "-a")
+	out, err := cmd.Output()
+	if err != nil {
+		return map[string]string{}
+	}
+
+	entries := make(map[string]string)
+	scanner := bufio.NewScanner(strings.NewReader(string(out)))
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" {
+			continue
+		}
+		fields := strings.Fields(line)
+		var ip, mac string
+		for _, f := range fields {
+			if parsed := net.ParseIP(strings.Trim(f, "()")); parsed != nil && parsed.To4() != nil {
+				ip = parsed.String()
+				continue
+			}
+			if m := normalizeMAC(strings.Trim(f, "()[]")); m != "" {
+				mac = m
+			}
+		}
+		if ip != "" && mac != "" {
+			entries[ip] = mac
+		}
+	}
+	return entries
+}
+
+func normalizeMAC(mac string) string {
+	m := strings.ToUpper(strings.ReplaceAll(strings.ReplaceAll(strings.TrimSpace(mac), "-", ":"), ".", ""))
+	if m == "" || m == "INCOMPLETE" || m == "<INCOMPLETE>" || m == "00:00:00:00:00:00" {
+		return ""
+	}
+	if strings.Contains(m, ":") {
+		parts := strings.Split(m, ":")
+		if len(parts) != 6 {
+			return ""
+		}
+		for i, p := range parts {
+			if len(p) == 1 {
+				parts[i] = "0" + p
+			}
+		}
+		return strings.Join(parts, ":")
+	}
+	if len(m) != 12 {
+		return ""
+	}
+	return strings.Join([]string{m[0:2], m[2:4], m[4:6], m[6:8], m[8:10], m[10:12]}, ":")
 }
 
 func warmARP(ctx context.Context, hosts []string) {

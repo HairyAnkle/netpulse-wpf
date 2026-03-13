@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -19,23 +20,21 @@ func NewVendorLookup(path string) *VendorLookup {
 		"D8:BB:2C": "Apple",
 	}}
 
-	if path == "" {
+	resolved := resolveOUIPath(path)
+	if resolved == "" {
+		log.Printf("OUI lookup file not found, using built-in sample map only")
 		return vl
 	}
 
-	if !filepath.IsAbs(path) {
-		if wd, err := os.Getwd(); err == nil {
-			path = filepath.Join(wd, path)
-		}
-	}
-
-	content, err := os.ReadFile(path)
+	content, err := os.ReadFile(resolved)
 	if err != nil {
+		log.Printf("failed reading OUI file %s: %v", resolved, err)
 		return vl
 	}
 
 	loaded := map[string]string{}
 	if err := json.Unmarshal(content, &loaded); err != nil {
+		log.Printf("failed parsing OUI file %s: %v", resolved, err)
 		return vl
 	}
 
@@ -46,7 +45,34 @@ func NewVendorLookup(path string) *VendorLookup {
 		}
 	}
 
+	log.Printf("loaded %d OUI prefixes from %s", len(vl.prefixes), resolved)
 	return vl
+}
+
+func resolveOUIPath(path string) string {
+	candidates := make([]string, 0, 4)
+	if path != "" {
+		candidates = append(candidates, path)
+	}
+	candidates = append(candidates,
+		"backend/data/latest_oui_lookup.json",
+		"../backend/data/latest_oui_lookup.json",
+	)
+
+	wd, _ := os.Getwd()
+	for _, c := range candidates {
+		if c == "" {
+			continue
+		}
+		candidate := c
+		if !filepath.IsAbs(candidate) {
+			candidate = filepath.Join(wd, candidate)
+		}
+		if _, err := os.Stat(candidate); err == nil {
+			return candidate
+		}
+	}
+	return ""
 }
 
 func (v *VendorLookup) Lookup(mac string) string {
