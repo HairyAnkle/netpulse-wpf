@@ -24,15 +24,20 @@ namespace UyKonek.ViewModels
         private bool _backendOnline = true;
         private string _activeSection = "NETWORK SCAN";
         private DeviceModel? _selectedDevice;
+        private DeviceModel? _diagnosticTargetDevice;
         private string _diagnosticTargetIp = "192.168.1.1";
-        private string _diagnosticOutput = "Select a diagnostics tab and run a check.";
+        private string _diagnosticOutput = "Select diagnostics tab, pick device/target, then run.";
         private bool _isDiagnosticBusy;
+        private long _pingLatencyMs;
+        private bool _pingAlive;
+        private int _pingMeterValue;
 
         public DashboardViewModel(ApiClientService apiClientService, SettingsService settingsService)
         {
             _apiClientService = apiClientService;
             BackendUrl = settingsService.BackendBaseUrl;
             Devices = new ObservableCollection<DeviceModel>();
+            DiagnosticLines = new ObservableCollection<string>();
             Devices.CollectionChanged += OnDevicesCollectionChanged;
 
             ScanCommand = new AsyncRelayCommand(ScanAsync, () => !IsScanning);
@@ -48,6 +53,7 @@ namespace UyKonek.ViewModels
             ShowTracerouteCommand = new AsyncRelayCommand(ShowTracerouteAsync);
             ShowOpenPortsCommand = new AsyncRelayCommand(ShowOpenPortsAsync);
             ShowWakeOnLanCommand = new AsyncRelayCommand(ShowWakeOnLanAsync);
+            UseSelectedDeviceCommand = new AsyncRelayCommand(UseSelectedDeviceAsync);
             RunDiagnosticCommand = new AsyncRelayCommand(RunDiagnosticAsync, () => !IsDiagnosticBusy);
 
             _isDark = App.ThemeService.IsDark;
@@ -63,6 +69,7 @@ namespace UyKonek.ViewModels
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public ObservableCollection<DeviceModel> Devices { get; }
+        public ObservableCollection<string> DiagnosticLines { get; }
 
         public AsyncRelayCommand ScanCommand { get; }
         public AsyncRelayCommand CancelCommand { get; }
@@ -77,6 +84,7 @@ namespace UyKonek.ViewModels
         public AsyncRelayCommand ShowTracerouteCommand { get; }
         public AsyncRelayCommand ShowOpenPortsCommand { get; }
         public AsyncRelayCommand ShowWakeOnLanCommand { get; }
+        public AsyncRelayCommand UseSelectedDeviceCommand { get; }
         public AsyncRelayCommand RunDiagnosticCommand { get; }
 
         public string BackendUrl { get; }
@@ -123,10 +131,40 @@ namespace UyKonek.ViewModels
             set => SetProperty(ref _diagnosticTargetIp, value);
         }
 
+        public DeviceModel? DiagnosticTargetDevice
+        {
+            get => _diagnosticTargetDevice;
+            set
+            {
+                if (SetProperty(ref _diagnosticTargetDevice, value) && value is not null)
+                {
+                    DiagnosticTargetIp = value.Ip;
+                }
+            }
+        }
+
         public string DiagnosticOutput
         {
             get => _diagnosticOutput;
             private set => SetProperty(ref _diagnosticOutput, value);
+        }
+
+        public long PingLatencyMs
+        {
+            get => _pingLatencyMs;
+            private set => SetProperty(ref _pingLatencyMs, value);
+        }
+
+        public bool PingAlive
+        {
+            get => _pingAlive;
+            private set => SetProperty(ref _pingAlive, value);
+        }
+
+        public int PingMeterValue
+        {
+            get => _pingMeterValue;
+            private set => SetProperty(ref _pingMeterValue, value);
         }
 
         public string StatusMessage
@@ -149,6 +187,8 @@ namespace UyKonek.ViewModels
         }
 
         public int NewDevicesCount => Devices.Count(d => d.IsNew);
+        public int UnknownVendorCount => Devices.Count(d => string.IsNullOrWhiteSpace(d.Vendor) || d.Vendor == "Unknown");
+        public int NewAlertCount => NewDevicesCount + UnknownVendorCount;
 
         public string ScanStatusLabel
         {
@@ -205,9 +245,6 @@ namespace UyKonek.ViewModels
         public bool IsWakeOnLanSection => string.Equals(ActiveSection, "WAKE-ON-LAN", StringComparison.Ordinal);
         public bool IsDiagnosticsSection => IsPingSection || IsTracerouteSection || IsOpenPortsSection || IsWakeOnLanSection;
         public bool IsDeviceTableSection => IsNetworkScanSection || IsDeviceInventorySection;
-
-        public int UnknownVendorCount => Devices.Count(d => string.IsNullOrWhiteSpace(d.Vendor) || d.Vendor == "Unknown");
-        public int NewAlertCount => NewDevicesCount + UnknownVendorCount;
 
         public DeviceModel? SelectedDevice
         {
@@ -308,13 +345,24 @@ namespace UyKonek.ViewModels
             ? $"{NewAlertCount} alert signal(s) detected"
             : "No alerts at the moment");
 
-        private Task ShowPingAsync() => SetSectionAsync("PING", "Run a live ping diagnostic against a target IP.");
+        private Task ShowPingAsync() => SetSectionAsync("PING", "Run ping diagnostics with meter-style latency feedback.");
+        private Task ShowTracerouteAsync() => SetSectionAsync("TRACEROUTE", "Traceroute analytics with hop lines.");
+        private Task ShowOpenPortsAsync() => SetSectionAsync("OPEN PORTS", "Scan common open ports and analyze exposure.");
+        private Task ShowWakeOnLanAsync() => SetSectionAsync("WAKE-ON-LAN", "Send magic packet to selected device MAC.");
 
-        private Task ShowTracerouteAsync() => SetSectionAsync("TRACEROUTE", "Traceroute module ready. Enter target IP and run diagnostics.");
+        private Task UseSelectedDeviceAsync()
+        {
+            if (SelectedDevice is null)
+            {
+                DiagnosticOutput = "No table device selected yet.";
+                return Task.CompletedTask;
+            }
 
-        private Task ShowOpenPortsAsync() => SetSectionAsync("OPEN PORTS", "Scan common open ports on a target IP.");
-
-        private Task ShowWakeOnLanAsync() => SetSectionAsync("WAKE-ON-LAN", "Wake-on-LAN helper ready. Enter target IP to resolve host first.");
+            DiagnosticTargetDevice = SelectedDevice;
+            DiagnosticTargetIp = SelectedDevice.Ip;
+            DiagnosticOutput = $"Diagnostic target set to {SelectedDevice.Ip}";
+            return Task.CompletedTask;
+        }
 
         private async Task RunDiagnosticAsync()
         {
@@ -331,41 +379,81 @@ namespace UyKonek.ViewModels
             }
 
             IsDiagnosticBusy = true;
+            DiagnosticLines.Clear();
             try
             {
                 switch (ActiveSection)
                 {
                     case "PING":
                         var ping = await _apiClientService.PingAsync(DiagnosticTargetIp, CancellationToken.None);
+                        PingAlive = ping.Alive;
+                        PingLatencyMs = ping.LatencyMs;
+                        PingMeterValue = CalculatePingMeter(ping.LatencyMs, ping.Alive);
                         DiagnosticOutput = ping.Alive
-                            ? $"PING {ping.Ip}: Alive (latency {ping.LatencyMs} ms)"
-                            : $"PING {ping.Ip}: Host did not respond";
+                            ? $"Target reachable ({ping.LatencyMs} ms)."
+                            : "Target did not respond to ping.";
                         break;
+
                     case "OPEN PORTS":
                         var ports = await _apiClientService.ScanPortsAsync(DiagnosticTargetIp, CancellationToken.None);
-                        DiagnosticOutput = ports.OpenPorts.Length > 0
-                            ? $"OPEN PORTS {ports.Ip}: {string.Join(", ", ports.OpenPorts)}"
-                            : $"OPEN PORTS {ports.Ip}: No common ports detected as open";
+                        DiagnosticLines.Add($"Target: {ports.Ip}");
+                        if (ports.OpenPorts.Length == 0)
+                        {
+                            DiagnosticLines.Add("No common ports detected open.");
+                        }
+                        else
+                        {
+                            DiagnosticLines.Add($"Open ports: {string.Join(", ", ports.OpenPorts)}");
+                            DiagnosticLines.Add($"Exposure score: {Math.Min(100, ports.OpenPorts.Length * 12)} / 100");
+                        }
+                        DiagnosticOutput = "Open ports analysis complete.";
                         break;
+
                     case "TRACEROUTE":
-                        DiagnosticOutput = "Traceroute backend endpoint is not yet implemented; this tab is UI-ready.";
+                        var hops = await _apiClientService.TracerouteAsync(DiagnosticTargetIp, CancellationToken.None);
+                        foreach (var hop in hops.Take(20))
+                        {
+                            DiagnosticLines.Add(hop);
+                        }
+                        DiagnosticOutput = hops.Count > 0
+                            ? $"Traceroute collected {hops.Count} line(s)."
+                            : "Traceroute returned no hop data.";
                         break;
+
                     case "WAKE-ON-LAN":
-                        DiagnosticOutput = "Wake-on-LAN backend endpoint is not yet implemented; this tab is UI-ready.";
-                        break;
-                    default:
-                        DiagnosticOutput = "Unsupported diagnostics section.";
+                        if (DiagnosticTargetDevice is null)
+                        {
+                            DiagnosticOutput = "Select a target device first (needs MAC address).";
+                            break;
+                        }
+                        var wol = await _apiClientService.SendWakeOnLanAsync(DiagnosticTargetDevice.Mac);
+                        DiagnosticLines.Add($"Target IP: {DiagnosticTargetDevice.Ip}");
+                        DiagnosticLines.Add($"Target MAC: {DiagnosticTargetDevice.Mac}");
+                        DiagnosticLines.Add(wol);
+                        DiagnosticOutput = "Wake-on-LAN packet sent.";
                         break;
                 }
             }
             catch (Exception ex)
             {
                 DiagnosticOutput = $"Diagnostics failed: {ex.Message}";
+                DiagnosticLines.Add(ex.Message);
             }
             finally
             {
                 IsDiagnosticBusy = false;
             }
+        }
+
+        private static int CalculatePingMeter(long latencyMs, bool alive)
+        {
+            if (!alive) return 0;
+            if (latencyMs <= 20) return 100;
+            if (latencyMs <= 50) return 80;
+            if (latencyMs <= 100) return 60;
+            if (latencyMs <= 200) return 40;
+            if (latencyMs <= 400) return 20;
+            return 10;
         }
 
         private Task SetSectionAsync(string section, string status)

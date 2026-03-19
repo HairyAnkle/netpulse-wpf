@@ -984,7 +984,6 @@
                 </StackPanel>
             </Border>
 
-
             <!-- Diagnostics Panel -->
             <Border Grid.Row="3" Margin="20,14,20,20"
                     Visibility="{Binding IsDiagnosticsSection, Converter={StaticResource BoolToVis}}"
@@ -993,37 +992,87 @@
                     BorderBrush="{DynamicResource Border.Primary}"
                     BorderThickness="1"
                     Padding="20">
-                <StackPanel>
-                    <TextBlock Text="{Binding ActiveSection}" Style="{StaticResource SectionHeader}"/>
-                    <TextBlock Text="Diagnostics toolkit for selected module."
-                               Foreground="{DynamicResource Text.Muted}"
-                               FontFamily="Consolas" FontSize="10" Margin="0,6,0,14"/>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                    <Grid Margin="0,0,0,12">
+                    <StackPanel Grid.Row="0">
+                        <TextBlock Text="{Binding ActiveSection}" Style="{StaticResource SectionHeader}"/>
+                        <TextBlock Text="Pick target from discovered devices or enter IP manually, then run diagnostics."
+                                   Foreground="{DynamicResource Text.Muted}"
+                                   FontFamily="Consolas" FontSize="10" Margin="0,6,0,10"/>
+                    </StackPanel>
+
+                    <Grid Grid.Row="1" Margin="0,0,0,12">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0"
+
+                        <ComboBox Grid.Column="0"
+                                  ItemsSource="{Binding Devices}"
+                                  SelectedItem="{Binding DiagnosticTargetDevice, Mode=TwoWay}"
+                                  DisplayMemberPath="Ip"
+                                  Margin="0,0,10,0"
+                                  Padding="8,6"
+                                  ToolTip="Select discovered device target"/>
+
+                        <TextBox Grid.Column="1"
                                  Text="{Binding DiagnosticTargetIp, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                  Margin="0,0,10,0"
                                  VerticalContentAlignment="Center"
                                  Padding="10,6"
                                  FontFamily="Consolas"/>
-                        <Button Grid.Column="1" Content="RUN" Style="{StaticResource PrimaryBtn}" Command="{Binding RunDiagnosticCommand}"/>
+
+                        <Button Grid.Column="2" Content="USE SELECTED"
+                                Style="{StaticResource GhostBtn}"
+                                Command="{Binding UseSelectedDeviceCommand}"
+                                Margin="0,0,10,0"/>
+
+                        <Button Grid.Column="3" Content="RUN"
+                                Style="{StaticResource PrimaryBtn}"
+                                Command="{Binding RunDiagnosticCommand}"/>
                     </Grid>
 
-                    <Border Background="{DynamicResource Bg.Card}"
+                    <Border Grid.Row="2"
+                            Visibility="{Binding IsPingSection, Converter={StaticResource BoolToVis}}"
+                            Background="{DynamicResource Bg.Card}"
+                            BorderBrush="{DynamicResource Border.Card}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="12"
+                            Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock Text="PING METER" Style="{StaticResource SectionHeader}"/>
+                            <TextBlock Text="{Binding PingLatencyMs, StringFormat={}{0} ms latency}" FontFamily="Consolas"
+                                       Foreground="{DynamicResource Text.Primary}" Margin="0,6,0,6"/>
+                            <ProgressBar Value="{Binding PingMeterValue}" Maximum="100" Height="12"/>
+                            <TextBlock Text="{Binding DiagnosticOutput}" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="10" Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Row="3"
+                            Background="{DynamicResource Bg.Card}"
                             BorderBrush="{DynamicResource Border.Card}"
                             BorderThickness="1"
                             CornerRadius="8"
                             Padding="12">
-                        <TextBlock Text="{Binding DiagnosticOutput}"
-                                   Foreground="{DynamicResource Text.Primary}"
-                                   FontFamily="Consolas"
-                                   TextWrapping="Wrap"/>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="ANALYTICS OUTPUT" Style="{StaticResource SectionHeader}"/>
+                            <ListBox Grid.Row="1" ItemsSource="{Binding DiagnosticLines}" Margin="0,8,0,0"/>
+                        </Grid>
                     </Border>
-                </StackPanel>
+                </Grid>
             </Border>
         </Grid>
     </Grid>
