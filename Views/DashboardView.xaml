@@ -438,13 +438,17 @@
                     <StackPanel Margin="0,8,0,0">
 
                         <TextBlock Text="MAIN" Style="{StaticResource NavSection}"/>
-                        <RadioButton Style="{StaticResource NavBtn}" Content="NETWORK SCAN" IsChecked="True">
+                        <RadioButton Style="{StaticResource NavBtn}" Content="NETWORK SCAN"
+                                     IsChecked="{Binding IsNetworkScanSection, Mode=OneWay}"
+                                     Command="{Binding ShowNetworkScanCommand}">
                             <RadioButton.Tag>
                                 <TextBlock Text="⬡" Foreground="{DynamicResource Color.Accent}" FontSize="14"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </RadioButton.Tag>
                         </RadioButton>
-                        <RadioButton Style="{StaticResource NavBtn}" Content="DEVICE INVENTORY">
+                        <RadioButton Style="{StaticResource NavBtn}" Content="DEVICE INVENTORY"
+                                     IsChecked="{Binding IsDeviceInventorySection, Mode=OneWay}"
+                                     Command="{Binding ShowDeviceInventoryCommand}">
                             <RadioButton.Tag>
                                 <TextBlock Text="▤" Foreground="{DynamicResource Text.Nav}" FontSize="13"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -580,7 +584,7 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <TextBlock Text="NETWORK SCAN"
+                        <TextBlock Text="{Binding ActiveSection}"
                                    Foreground="{DynamicResource Text.Primary}"
                                    FontFamily="Consolas" FontSize="16" FontWeight="Bold"/>
                         <TextBlock Text="{Binding StatusMessage}"
@@ -706,7 +710,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="DISCOVERED DEVICES"
+                            <TextBlock Grid.Column="0" Text="{Binding ActiveSection}"
                                        Style="{StaticResource SectionHeader}" VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="1"
                                        Text="Click SCAN NETWORK to discover devices"
