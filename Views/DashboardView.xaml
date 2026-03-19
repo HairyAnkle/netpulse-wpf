@@ -438,25 +438,33 @@
                     <StackPanel Margin="0,8,0,0">
 
                         <TextBlock Text="MAIN" Style="{StaticResource NavSection}"/>
-                        <RadioButton Style="{StaticResource NavBtn}" Content="NETWORK SCAN" IsChecked="True">
+                        <RadioButton Style="{StaticResource NavBtn}" Content="NETWORK SCAN"
+                                     IsChecked="{Binding IsNetworkScanSection, Mode=OneWay}"
+                                     Command="{Binding ShowNetworkScanCommand}">
                             <RadioButton.Tag>
                                 <TextBlock Text="⬡" Foreground="{DynamicResource Color.Accent}" FontSize="14"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </RadioButton.Tag>
                         </RadioButton>
-                        <RadioButton Style="{StaticResource NavBtn}" Content="DEVICE INVENTORY">
+                        <RadioButton Style="{StaticResource NavBtn}" Content="DEVICE INVENTORY"
+                                     IsChecked="{Binding IsDeviceInventorySection, Mode=OneWay}"
+                                     Command="{Binding ShowDeviceInventoryCommand}">
                             <RadioButton.Tag>
                                 <TextBlock Text="▤" Foreground="{DynamicResource Text.Nav}" FontSize="13"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </RadioButton.Tag>
                         </RadioButton>
-                        <RadioButton Style="{StaticResource NavBtn}" Content="DEVICE DETAILS">
+                        <RadioButton Style="{StaticResource NavBtn}" Content="DEVICE DETAILS"
+                                     IsChecked="{Binding IsDeviceDetailsSection, Mode=OneWay}"
+                                     Command="{Binding ShowDeviceDetailsCommand}">
                             <RadioButton.Tag>
                                 <TextBlock Text="◧" Foreground="{DynamicResource Text.Nav}" FontSize="13"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </RadioButton.Tag>
                         </RadioButton>
-                        <RadioButton Style="{StaticResource NavBtn}" Content="ALERTS">
+                        <RadioButton Style="{StaticResource NavBtn}" Content="ALERTS"
+                                     IsChecked="{Binding IsAlertsSection, Mode=OneWay}"
+                                     Command="{Binding ShowAlertsCommand}">
                             <RadioButton.Tag>
                                 <TextBlock Text="◈" Foreground="{DynamicResource Text.Nav}" FontSize="13"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -464,25 +472,33 @@
                         </RadioButton>
 
                         <TextBlock Text="DIAGNOSTICS" Style="{StaticResource NavSection}"/>
-                        <RadioButton Style="{StaticResource NavBtn}" Content="PING">
+                        <RadioButton Style="{StaticResource NavBtn}" Content="PING"
+                                     IsChecked="{Binding IsPingSection, Mode=OneWay}"
+                                     Command="{Binding ShowPingCommand}">
                             <RadioButton.Tag>
                                 <TextBlock Text="◎" Foreground="{DynamicResource Text.Nav}" FontSize="13"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </RadioButton.Tag>
                         </RadioButton>
-                        <RadioButton Style="{StaticResource NavBtn}" Content="TRACEROUTE">
+                        <RadioButton Style="{StaticResource NavBtn}" Content="TRACEROUTE"
+                                     IsChecked="{Binding IsTracerouteSection, Mode=OneWay}"
+                                     Command="{Binding ShowTracerouteCommand}">
                             <RadioButton.Tag>
                                 <TextBlock Text="⤳" Foreground="{DynamicResource Text.Nav}" FontSize="14"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </RadioButton.Tag>
                         </RadioButton>
-                        <RadioButton Style="{StaticResource NavBtn}" Content="OPEN PORTS">
+                        <RadioButton Style="{StaticResource NavBtn}" Content="OPEN PORTS"
+                                     IsChecked="{Binding IsOpenPortsSection, Mode=OneWay}"
+                                     Command="{Binding ShowOpenPortsCommand}">
                             <RadioButton.Tag>
                                 <TextBlock Text="⬡" Foreground="{DynamicResource Text.Nav}" FontSize="13"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </RadioButton.Tag>
                         </RadioButton>
-                        <RadioButton Style="{StaticResource NavBtn}" Content="WAKE-ON-LAN">
+                        <RadioButton Style="{StaticResource NavBtn}" Content="WAKE-ON-LAN"
+                                     IsChecked="{Binding IsWakeOnLanSection, Mode=OneWay}"
+                                     Command="{Binding ShowWakeOnLanCommand}">
                             <RadioButton.Tag>
                                 <TextBlock Text="⏻" Foreground="{DynamicResource Text.Nav}" FontSize="13"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -580,7 +596,7 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <TextBlock Text="NETWORK SCAN"
+                        <TextBlock Text="{Binding ActiveSection}"
                                    Foreground="{DynamicResource Text.Primary}"
                                    FontFamily="Consolas" FontSize="16" FontWeight="Bold"/>
                         <TextBlock Text="{Binding StatusMessage}"
@@ -650,6 +666,7 @@
 
             <!-- Quick Tools (placeholder for next phase) -->
             <Border Grid.Row="3" Margin="20,14,20,0"
+                    Visibility="{Binding IsNetworkScanSection, Converter={StaticResource BoolToVis}}"
                     Background="{DynamicResource Bg.Surface}"
                     CornerRadius="10"
                     BorderBrush="{DynamicResource Border.Primary}"
@@ -687,6 +704,7 @@
 
             <!-- Device Table -->
             <Border Grid.Row="3" Margin="20,14,20,20"
+                    Visibility="{Binding IsDeviceTableSection, Converter={StaticResource BoolToVis}}"
                     Background="{DynamicResource Bg.Surface}"
                     CornerRadius="10"
                     BorderBrush="{DynamicResource Border.Primary}"
@@ -706,7 +724,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="DISCOVERED DEVICES"
+                            <TextBlock Grid.Column="0" Text="{Binding ActiveSection}"
                                        Style="{StaticResource SectionHeader}" VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="1"
                                        Text="Click SCAN NETWORK to discover devices"
@@ -888,6 +906,174 @@
                 </Grid>
             </Border>
 
+
+
+            <!-- Device Details -->
+            <Border Grid.Row="3" Margin="20,14,20,20"
+                    Visibility="{Binding IsDeviceDetailsSection, Converter={StaticResource BoolToVis}}"
+                    Background="{DynamicResource Bg.Surface}"
+                    CornerRadius="10"
+                    BorderBrush="{DynamicResource Border.Primary}"
+                    BorderThickness="1"
+                    Padding="20">
+                <StackPanel>
+                    <TextBlock Text="DEVICE DETAILS" Style="{StaticResource SectionHeader}"/>
+                    <TextBlock Text="Select a device from Network Scan or Device Inventory to view full metadata."
+                               Foreground="{DynamicResource Text.Muted}"
+                               FontFamily="Consolas" FontSize="10" Margin="0,6,0,16"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="IP ADDRESS" Style="{StaticResource SectionHeader}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedDevice.Ip, TargetNullValue=—}" Foreground="{DynamicResource Text.Primary}" FontFamily="Consolas"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="MAC ADDRESS" Style="{StaticResource SectionHeader}" Margin="0,10,0,0"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedDevice.Mac, TargetNullValue=—}" Foreground="{DynamicResource Text.Primary}" FontFamily="Consolas" Margin="0,10,0,0"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="HOSTNAME" Style="{StaticResource SectionHeader}" Margin="0,10,0,0"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedDevice.Hostname, TargetNullValue=—}" Foreground="{DynamicResource Text.Primary}" FontFamily="Consolas" Margin="0,10,0,0"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="VENDOR" Style="{StaticResource SectionHeader}" Margin="0,10,0,0"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedDevice.Vendor, TargetNullValue=—}" Foreground="{DynamicResource Text.Primary}" FontFamily="Consolas" Margin="0,10,0,0"/>
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="STATUS" Style="{StaticResource SectionHeader}" Margin="0,10,0,0"/>
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedDevice.IsNew, TargetNullValue=—}" Foreground="{DynamicResource Text.Primary}" FontFamily="Consolas" Margin="0,10,0,0"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Alerts -->
+            <Border Grid.Row="3" Margin="20,14,20,20"
+                    Visibility="{Binding IsAlertsSection, Converter={StaticResource BoolToVis}}"
+                    Background="{DynamicResource Bg.Surface}"
+                    CornerRadius="10"
+                    BorderBrush="{DynamicResource Border.Primary}"
+                    BorderThickness="1"
+                    Padding="20">
+                <StackPanel>
+                    <TextBlock Text="ALERTS" Style="{StaticResource SectionHeader}"/>
+                    <TextBlock Text="Auto-generated signals from the latest scan."
+                               Foreground="{DynamicResource Text.Muted}"
+                               FontFamily="Consolas" FontSize="10" Margin="0,6,0,14"/>
+
+                    <UniformGrid Columns="2" Rows="1">
+                        <Border Style="{StaticResource StatCard}" Margin="0,0,8,0">
+                            <StackPanel>
+                                <TextBlock Text="NEW DEVICE SIGNALS" Style="{StaticResource SectionHeader}"/>
+                                <TextBlock Text="{Binding NewDevicesCount}" Foreground="{DynamicResource Color.Warning}" FontFamily="Consolas" FontSize="28" FontWeight="Bold" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource StatCard}" Margin="8,0,0,0">
+                            <StackPanel>
+                                <TextBlock Text="UNKNOWN VENDOR SIGNALS" Style="{StaticResource SectionHeader}"/>
+                                <TextBlock Text="{Binding UnknownVendorCount}" Foreground="{DynamicResource Color.Danger}" FontFamily="Consolas" FontSize="28" FontWeight="Bold" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+                </StackPanel>
+            </Border>
+
+            <!-- Diagnostics Panel -->
+            <Border Grid.Row="3" Margin="20,14,20,20"
+                    Visibility="{Binding IsDiagnosticsSection, Converter={StaticResource BoolToVis}}"
+                    Background="{DynamicResource Bg.Surface}"
+                    CornerRadius="10"
+                    BorderBrush="{DynamicResource Border.Primary}"
+                    BorderThickness="1"
+                    Padding="20">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0">
+                        <TextBlock Text="{Binding ActiveSection}" Style="{StaticResource SectionHeader}"/>
+                        <TextBlock Text="Pick target from discovered devices or enter IP manually, then run diagnostics."
+                                   Foreground="{DynamicResource Text.Muted}"
+                                   FontFamily="Consolas" FontSize="10" Margin="0,6,0,10"/>
+                    </StackPanel>
+
+                    <Grid Grid.Row="1" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <ComboBox Grid.Column="0"
+                                  ItemsSource="{Binding Devices}"
+                                  SelectedItem="{Binding DiagnosticTargetDevice, Mode=TwoWay}"
+                                  DisplayMemberPath="Ip"
+                                  Margin="0,0,10,0"
+                                  Padding="8,6"
+                                  ToolTip="Select discovered device target"/>
+
+                        <TextBox Grid.Column="1"
+                                 Text="{Binding DiagnosticTargetIp, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0,0,10,0"
+                                 VerticalContentAlignment="Center"
+                                 Padding="10,6"
+                                 FontFamily="Consolas"/>
+
+                        <Button Grid.Column="2" Content="USE SELECTED"
+                                Style="{StaticResource GhostBtn}"
+                                Command="{Binding UseSelectedDeviceCommand}"
+                                Margin="0,0,10,0"/>
+
+                        <Button Grid.Column="3" Content="RUN"
+                                Style="{StaticResource PrimaryBtn}"
+                                Command="{Binding RunDiagnosticCommand}"/>
+                    </Grid>
+
+                    <Border Grid.Row="2"
+                            Visibility="{Binding IsPingSection, Converter={StaticResource BoolToVis}}"
+                            Background="{DynamicResource Bg.Card}"
+                            BorderBrush="{DynamicResource Border.Card}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="12"
+                            Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock Text="PING METER" Style="{StaticResource SectionHeader}"/>
+                            <TextBlock Text="{Binding PingLatencyMs, StringFormat={}{0} ms latency}" FontFamily="Consolas"
+                                       Foreground="{DynamicResource Text.Primary}" Margin="0,6,0,6"/>
+                            <ProgressBar Value="{Binding PingMeterValue}" Maximum="100" Height="12"/>
+                            <TextBlock Text="{Binding DiagnosticOutput}" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="10" Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Row="3"
+                            Background="{DynamicResource Bg.Card}"
+                            BorderBrush="{DynamicResource Border.Card}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="12">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="ANALYTICS OUTPUT" Style="{StaticResource SectionHeader}"/>
+                            <ListBox Grid.Row="1" ItemsSource="{Binding DiagnosticLines}" Margin="0,8,0,0"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
         </Grid>
     </Grid>
 </UserControl>
