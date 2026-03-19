@@ -21,6 +21,7 @@ namespace UyKonek.ViewModels
         private string? _errorMessage;
         private bool _isDark = true;
         private bool _backendOnline = true;
+        private string _activeSection = "NETWORK SCAN";
 
         public DashboardViewModel(ApiClientService apiClientService, SettingsService settingsService)
         {
@@ -34,6 +35,8 @@ namespace UyKonek.ViewModels
             CopyIpCommand = new AsyncRelayCommand(CopyIpAsync);
             CopyMacCommand = new AsyncRelayCommand(CopyMacAsync);
             ToggleThemeCommand = new AsyncRelayCommand(ToggleThemeAsync);
+            ShowNetworkScanCommand = new AsyncRelayCommand(ShowNetworkScanAsync);
+            ShowDeviceInventoryCommand = new AsyncRelayCommand(ShowDeviceInventoryAsync);
 
             // Sync initial state with ThemeService
             _isDark = App.ThemeService.IsDark;
@@ -55,6 +58,8 @@ namespace UyKonek.ViewModels
         public AsyncRelayCommand CopyIpCommand { get; }
         public AsyncRelayCommand CopyMacCommand { get; }
         public AsyncRelayCommand ToggleThemeCommand { get; }
+        public AsyncRelayCommand ShowNetworkScanCommand { get; }
+        public AsyncRelayCommand ShowDeviceInventoryCommand { get; }
 
         public string BackendUrl { get; }
 
@@ -130,6 +135,23 @@ namespace UyKonek.ViewModels
 
         public string BackendStatusLabel => _backendOnline ? "ONLINE" : "OFFLINE";
 
+        public string ActiveSection
+        {
+            get => _activeSection;
+            private set
+            {
+                if (SetProperty(ref _activeSection, value))
+                {
+                    OnPropertyChanged(nameof(IsNetworkScanSection));
+                    OnPropertyChanged(nameof(IsDeviceInventorySection));
+                }
+            }
+        }
+
+        public bool IsNetworkScanSection => string.Equals(ActiveSection, "NETWORK SCAN", StringComparison.Ordinal);
+
+        public bool IsDeviceInventorySection => string.Equals(ActiveSection, "DEVICE INVENTORY", StringComparison.Ordinal);
+
         public DeviceModel? SelectedDevice { get; set; }
 
         // ── Commands ────────────────────────────────────────────
@@ -200,6 +222,24 @@ namespace UyKonek.ViewModels
         private Task ToggleThemeAsync()
         {
             App.ThemeService.Toggle();
+            return Task.CompletedTask;
+        }
+
+        private Task ShowNetworkScanAsync()
+        {
+            ActiveSection = "NETWORK SCAN";
+            StatusMessage = Devices.Count > 0
+                ? $"Scan complete: {Devices.Count} hosts discovered"
+                : "Ready to scan";
+            return Task.CompletedTask;
+        }
+
+        private Task ShowDeviceInventoryAsync()
+        {
+            ActiveSection = "DEVICE INVENTORY";
+            StatusMessage = Devices.Count > 0
+                ? $"Inventory loaded: {Devices.Count} device(s)"
+                : "No devices in inventory yet";
             return Task.CompletedTask;
         }
 
