@@ -1052,7 +1052,7 @@
                             <TextBlock Text="PING METER" Style="{StaticResource SectionHeader}"/>
                             <TextBlock Text="{Binding PingLatencyMs, StringFormat={}{0} ms latency}" FontFamily="Consolas"
                                        Foreground="{DynamicResource Text.Primary}" Margin="0,6,0,6"/>
-                            <ProgressBar Value="{Binding PingMeterValue}" Maximum="100" Height="12"/>
+                            <ProgressBar Value="{Binding PingMeterValue, Mode=OneWay}" Maximum="100" Height="12"/>
                             <TextBlock Text="{Binding DiagnosticOutput}" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="10" Margin="0,6,0,0"/>
                         </StackPanel>
                     </Border>
