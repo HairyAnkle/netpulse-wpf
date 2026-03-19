@@ -454,13 +454,17 @@
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </RadioButton.Tag>
                         </RadioButton>
-                        <RadioButton Style="{StaticResource NavBtn}" Content="DEVICE DETAILS">
+                        <RadioButton Style="{StaticResource NavBtn}" Content="DEVICE DETAILS"
+                                     IsChecked="{Binding IsDeviceDetailsSection, Mode=OneWay}"
+                                     Command="{Binding ShowDeviceDetailsCommand}">
                             <RadioButton.Tag>
                                 <TextBlock Text="◧" Foreground="{DynamicResource Text.Nav}" FontSize="13"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </RadioButton.Tag>
                         </RadioButton>
-                        <RadioButton Style="{StaticResource NavBtn}" Content="ALERTS">
+                        <RadioButton Style="{StaticResource NavBtn}" Content="ALERTS"
+                                     IsChecked="{Binding IsAlertsSection, Mode=OneWay}"
+                                     Command="{Binding ShowAlertsCommand}">
                             <RadioButton.Tag>
                                 <TextBlock Text="◈" Foreground="{DynamicResource Text.Nav}" FontSize="13"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -654,6 +658,7 @@
 
             <!-- Quick Tools (placeholder for next phase) -->
             <Border Grid.Row="3" Margin="20,14,20,0"
+                    Visibility="{Binding IsNetworkScanSection, Converter={StaticResource BoolToVis}}"
                     Background="{DynamicResource Bg.Surface}"
                     CornerRadius="10"
                     BorderBrush="{DynamicResource Border.Primary}"
@@ -691,6 +696,7 @@
 
             <!-- Device Table -->
             <Border Grid.Row="3" Margin="20,14,20,20"
+                    Visibility="{Binding IsDeviceTableSection, Converter={StaticResource BoolToVis}}"
                     Background="{DynamicResource Bg.Surface}"
                     CornerRadius="10"
                     BorderBrush="{DynamicResource Border.Primary}"
@@ -892,6 +898,83 @@
                 </Grid>
             </Border>
 
+
+
+            <!-- Device Details -->
+            <Border Grid.Row="3" Margin="20,14,20,20"
+                    Visibility="{Binding IsDeviceDetailsSection, Converter={StaticResource BoolToVis}}"
+                    Background="{DynamicResource Bg.Surface}"
+                    CornerRadius="10"
+                    BorderBrush="{DynamicResource Border.Primary}"
+                    BorderThickness="1"
+                    Padding="20">
+                <StackPanel>
+                    <TextBlock Text="DEVICE DETAILS" Style="{StaticResource SectionHeader}"/>
+                    <TextBlock Text="Select a device from Network Scan or Device Inventory to view full metadata."
+                               Foreground="{DynamicResource Text.Muted}"
+                               FontFamily="Consolas" FontSize="10" Margin="0,6,0,16"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="IP ADDRESS" Style="{StaticResource SectionHeader}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedDevice.Ip, TargetNullValue=—}" Foreground="{DynamicResource Text.Primary}" FontFamily="Consolas"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="MAC ADDRESS" Style="{StaticResource SectionHeader}" Margin="0,10,0,0"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedDevice.Mac, TargetNullValue=—}" Foreground="{DynamicResource Text.Primary}" FontFamily="Consolas" Margin="0,10,0,0"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="HOSTNAME" Style="{StaticResource SectionHeader}" Margin="0,10,0,0"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedDevice.Hostname, TargetNullValue=—}" Foreground="{DynamicResource Text.Primary}" FontFamily="Consolas" Margin="0,10,0,0"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="VENDOR" Style="{StaticResource SectionHeader}" Margin="0,10,0,0"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedDevice.Vendor, TargetNullValue=—}" Foreground="{DynamicResource Text.Primary}" FontFamily="Consolas" Margin="0,10,0,0"/>
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="STATUS" Style="{StaticResource SectionHeader}" Margin="0,10,0,0"/>
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedDevice.IsNew, TargetNullValue=—}" Foreground="{DynamicResource Text.Primary}" FontFamily="Consolas" Margin="0,10,0,0"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Alerts -->
+            <Border Grid.Row="3" Margin="20,14,20,20"
+                    Visibility="{Binding IsAlertsSection, Converter={StaticResource BoolToVis}}"
+                    Background="{DynamicResource Bg.Surface}"
+                    CornerRadius="10"
+                    BorderBrush="{DynamicResource Border.Primary}"
+                    BorderThickness="1"
+                    Padding="20">
+                <StackPanel>
+                    <TextBlock Text="ALERTS" Style="{StaticResource SectionHeader}"/>
+                    <TextBlock Text="Auto-generated signals from the latest scan."
+                               Foreground="{DynamicResource Text.Muted}"
+                               FontFamily="Consolas" FontSize="10" Margin="0,6,0,14"/>
+
+                    <UniformGrid Columns="2" Rows="1">
+                        <Border Style="{StaticResource StatCard}" Margin="0,0,8,0">
+                            <StackPanel>
+                                <TextBlock Text="NEW DEVICE SIGNALS" Style="{StaticResource SectionHeader}"/>
+                                <TextBlock Text="{Binding NewDevicesCount}" Foreground="{DynamicResource Color.Warning}" FontFamily="Consolas" FontSize="28" FontWeight="Bold" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource StatCard}" Margin="8,0,0,0">
+                            <StackPanel>
+                                <TextBlock Text="UNKNOWN VENDOR SIGNALS" Style="{StaticResource SectionHeader}"/>
+                                <TextBlock Text="{Binding UnknownVendorCount}" Foreground="{DynamicResource Color.Danger}" FontFamily="Consolas" FontSize="28" FontWeight="Bold" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+                </StackPanel>
+            </Border>
         </Grid>
     </Grid>
 </UserControl>

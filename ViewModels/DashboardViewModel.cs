@@ -22,6 +22,7 @@ namespace UyKonek.ViewModels
         private bool _isDark = true;
         private bool _backendOnline = true;
         private string _activeSection = "NETWORK SCAN";
+        private DeviceModel? _selectedDevice;
 
         public DashboardViewModel(ApiClientService apiClientService, SettingsService settingsService)
         {
@@ -37,6 +38,8 @@ namespace UyKonek.ViewModels
             ToggleThemeCommand = new AsyncRelayCommand(ToggleThemeAsync);
             ShowNetworkScanCommand = new AsyncRelayCommand(ShowNetworkScanAsync);
             ShowDeviceInventoryCommand = new AsyncRelayCommand(ShowDeviceInventoryAsync);
+            ShowDeviceDetailsCommand = new AsyncRelayCommand(ShowDeviceDetailsAsync);
+            ShowAlertsCommand = new AsyncRelayCommand(ShowAlertsAsync);
 
             // Sync initial state with ThemeService
             _isDark = App.ThemeService.IsDark;
@@ -60,6 +63,8 @@ namespace UyKonek.ViewModels
         public AsyncRelayCommand ToggleThemeCommand { get; }
         public AsyncRelayCommand ShowNetworkScanCommand { get; }
         public AsyncRelayCommand ShowDeviceInventoryCommand { get; }
+        public AsyncRelayCommand ShowDeviceDetailsCommand { get; }
+        public AsyncRelayCommand ShowAlertsCommand { get; }
 
         public string BackendUrl { get; }
 
@@ -144,6 +149,9 @@ namespace UyKonek.ViewModels
                 {
                     OnPropertyChanged(nameof(IsNetworkScanSection));
                     OnPropertyChanged(nameof(IsDeviceInventorySection));
+                    OnPropertyChanged(nameof(IsDeviceDetailsSection));
+                    OnPropertyChanged(nameof(IsAlertsSection));
+                    OnPropertyChanged(nameof(IsDeviceTableSection));
                 }
             }
         }
@@ -152,7 +160,29 @@ namespace UyKonek.ViewModels
 
         public bool IsDeviceInventorySection => string.Equals(ActiveSection, "DEVICE INVENTORY", StringComparison.Ordinal);
 
-        public DeviceModel? SelectedDevice { get; set; }
+        public bool IsDeviceDetailsSection => string.Equals(ActiveSection, "DEVICE DETAILS", StringComparison.Ordinal);
+
+        public bool IsAlertsSection => string.Equals(ActiveSection, "ALERTS", StringComparison.Ordinal);
+
+        public bool IsDeviceTableSection => IsNetworkScanSection || IsDeviceInventorySection;
+
+        public int UnknownVendorCount => Devices.Count(d => string.IsNullOrWhiteSpace(d.Vendor) || d.Vendor == "Unknown");
+
+        public int NewAlertCount => NewDevicesCount + UnknownVendorCount;
+
+        public DeviceModel? SelectedDevice
+        {
+            get => _selectedDevice;
+            set
+            {
+                if (SetProperty(ref _selectedDevice, value))
+                {
+                    OnPropertyChanged(nameof(HasSelectedDevice));
+                }
+            }
+        }
+
+        public bool HasSelectedDevice => SelectedDevice is not null;
 
         // ── Commands ────────────────────────────────────────────
 
@@ -243,9 +273,29 @@ namespace UyKonek.ViewModels
             return Task.CompletedTask;
         }
 
+        private Task ShowDeviceDetailsAsync()
+        {
+            ActiveSection = "DEVICE DETAILS";
+            StatusMessage = SelectedDevice is null
+                ? "Select a device from Network Scan/Inventory to view details"
+                : $"Viewing details for {SelectedDevice.Ip}";
+            return Task.CompletedTask;
+        }
+
+        private Task ShowAlertsAsync()
+        {
+            ActiveSection = "ALERTS";
+            StatusMessage = NewAlertCount > 0
+                ? $"{NewAlertCount} alert signal(s) detected"
+                : "No alerts at the moment";
+            return Task.CompletedTask;
+        }
+
         private void OnDevicesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             OnPropertyChanged(nameof(NewDevicesCount));
+            OnPropertyChanged(nameof(UnknownVendorCount));
+            OnPropertyChanged(nameof(NewAlertCount));
             OnPropertyChanged(nameof(ScanStatusLabel));
             OnPropertyChanged(nameof(ScanStatusDetail));
         }
