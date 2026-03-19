@@ -21,6 +21,8 @@ namespace UyKonek.ViewModels
         private string? _errorMessage;
         private bool _isDark = true;
         private bool _backendOnline = true;
+        private string _activeSection = "NETWORK SCAN";
+        private DeviceModel? _selectedDevice;
 
         public DashboardViewModel(ApiClientService apiClientService, SettingsService settingsService)
         {
@@ -34,6 +36,10 @@ namespace UyKonek.ViewModels
             CopyIpCommand = new AsyncRelayCommand(CopyIpAsync);
             CopyMacCommand = new AsyncRelayCommand(CopyMacAsync);
             ToggleThemeCommand = new AsyncRelayCommand(ToggleThemeAsync);
+            ShowNetworkScanCommand = new AsyncRelayCommand(ShowNetworkScanAsync);
+            ShowDeviceInventoryCommand = new AsyncRelayCommand(ShowDeviceInventoryAsync);
+            ShowDeviceDetailsCommand = new AsyncRelayCommand(ShowDeviceDetailsAsync);
+            ShowAlertsCommand = new AsyncRelayCommand(ShowAlertsAsync);
 
             // Sync initial state with ThemeService
             _isDark = App.ThemeService.IsDark;
@@ -55,6 +61,10 @@ namespace UyKonek.ViewModels
         public AsyncRelayCommand CopyIpCommand { get; }
         public AsyncRelayCommand CopyMacCommand { get; }
         public AsyncRelayCommand ToggleThemeCommand { get; }
+        public AsyncRelayCommand ShowNetworkScanCommand { get; }
+        public AsyncRelayCommand ShowDeviceInventoryCommand { get; }
+        public AsyncRelayCommand ShowDeviceDetailsCommand { get; }
+        public AsyncRelayCommand ShowAlertsCommand { get; }
 
         public string BackendUrl { get; }
 
@@ -130,7 +140,49 @@ namespace UyKonek.ViewModels
 
         public string BackendStatusLabel => _backendOnline ? "ONLINE" : "OFFLINE";
 
-        public DeviceModel? SelectedDevice { get; set; }
+        public string ActiveSection
+        {
+            get => _activeSection;
+            private set
+            {
+                if (SetProperty(ref _activeSection, value))
+                {
+                    OnPropertyChanged(nameof(IsNetworkScanSection));
+                    OnPropertyChanged(nameof(IsDeviceInventorySection));
+                    OnPropertyChanged(nameof(IsDeviceDetailsSection));
+                    OnPropertyChanged(nameof(IsAlertsSection));
+                    OnPropertyChanged(nameof(IsDeviceTableSection));
+                }
+            }
+        }
+
+        public bool IsNetworkScanSection => string.Equals(ActiveSection, "NETWORK SCAN", StringComparison.Ordinal);
+
+        public bool IsDeviceInventorySection => string.Equals(ActiveSection, "DEVICE INVENTORY", StringComparison.Ordinal);
+
+        public bool IsDeviceDetailsSection => string.Equals(ActiveSection, "DEVICE DETAILS", StringComparison.Ordinal);
+
+        public bool IsAlertsSection => string.Equals(ActiveSection, "ALERTS", StringComparison.Ordinal);
+
+        public bool IsDeviceTableSection => IsNetworkScanSection || IsDeviceInventorySection;
+
+        public int UnknownVendorCount => Devices.Count(d => string.IsNullOrWhiteSpace(d.Vendor) || d.Vendor == "Unknown");
+
+        public int NewAlertCount => NewDevicesCount + UnknownVendorCount;
+
+        public DeviceModel? SelectedDevice
+        {
+            get => _selectedDevice;
+            set
+            {
+                if (SetProperty(ref _selectedDevice, value))
+                {
+                    OnPropertyChanged(nameof(HasSelectedDevice));
+                }
+            }
+        }
+
+        public bool HasSelectedDevice => SelectedDevice is not null;
 
         // ── Commands ────────────────────────────────────────────
 
@@ -150,7 +202,7 @@ namespace UyKonek.ViewModels
 
                 _backendOnline = true;
                 OnPropertyChanged(nameof(BackendStatusLabel));
-                StatusMessage = $"Scan {result.Scan.ScanId} complete: {result.Scan.HostCount} hosts discovered";
+                StatusMessage = $"Scan complete: {result.Scan.HostCount} hosts discovered";
             }
             catch (OperationCanceledException)
             {
@@ -160,7 +212,7 @@ namespace UyKonek.ViewModels
             {
                 _backendOnline = false;
                 OnPropertyChanged(nameof(BackendStatusLabel));
-                ErrorMessage = ex.Message + "\nTip: Start backend with `uvicorn app.main:app --port 8787`";
+                ErrorMessage = ex.Message + "\nTip: Start Go backend with `cd uykonek-go-backend && go run main.go`";
                 StatusMessage = "Scan failed";
             }
             finally
@@ -203,9 +255,47 @@ namespace UyKonek.ViewModels
             return Task.CompletedTask;
         }
 
+        private Task ShowNetworkScanAsync()
+        {
+            ActiveSection = "NETWORK SCAN";
+            StatusMessage = Devices.Count > 0
+                ? $"Scan complete: {Devices.Count} hosts discovered"
+                : "Ready to scan";
+            return Task.CompletedTask;
+        }
+
+        private Task ShowDeviceInventoryAsync()
+        {
+            ActiveSection = "DEVICE INVENTORY";
+            StatusMessage = Devices.Count > 0
+                ? $"Inventory loaded: {Devices.Count} device(s)"
+                : "No devices in inventory yet";
+            return Task.CompletedTask;
+        }
+
+        private Task ShowDeviceDetailsAsync()
+        {
+            ActiveSection = "DEVICE DETAILS";
+            StatusMessage = SelectedDevice is null
+                ? "Select a device from Network Scan/Inventory to view details"
+                : $"Viewing details for {SelectedDevice.Ip}";
+            return Task.CompletedTask;
+        }
+
+        private Task ShowAlertsAsync()
+        {
+            ActiveSection = "ALERTS";
+            StatusMessage = NewAlertCount > 0
+                ? $"{NewAlertCount} alert signal(s) detected"
+                : "No alerts at the moment";
+            return Task.CompletedTask;
+        }
+
         private void OnDevicesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             OnPropertyChanged(nameof(NewDevicesCount));
+            OnPropertyChanged(nameof(UnknownVendorCount));
+            OnPropertyChanged(nameof(NewAlertCount));
             OnPropertyChanged(nameof(ScanStatusLabel));
             OnPropertyChanged(nameof(ScanStatusDetail));
         }
