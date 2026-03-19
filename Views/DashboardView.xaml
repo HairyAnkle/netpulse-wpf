@@ -472,25 +472,33 @@
                         </RadioButton>
 
                         <TextBlock Text="DIAGNOSTICS" Style="{StaticResource NavSection}"/>
-                        <RadioButton Style="{StaticResource NavBtn}" Content="PING">
+                        <RadioButton Style="{StaticResource NavBtn}" Content="PING"
+                                     IsChecked="{Binding IsPingSection, Mode=OneWay}"
+                                     Command="{Binding ShowPingCommand}">
                             <RadioButton.Tag>
                                 <TextBlock Text="◎" Foreground="{DynamicResource Text.Nav}" FontSize="13"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </RadioButton.Tag>
                         </RadioButton>
-                        <RadioButton Style="{StaticResource NavBtn}" Content="TRACEROUTE">
+                        <RadioButton Style="{StaticResource NavBtn}" Content="TRACEROUTE"
+                                     IsChecked="{Binding IsTracerouteSection, Mode=OneWay}"
+                                     Command="{Binding ShowTracerouteCommand}">
                             <RadioButton.Tag>
                                 <TextBlock Text="⤳" Foreground="{DynamicResource Text.Nav}" FontSize="14"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </RadioButton.Tag>
                         </RadioButton>
-                        <RadioButton Style="{StaticResource NavBtn}" Content="OPEN PORTS">
+                        <RadioButton Style="{StaticResource NavBtn}" Content="OPEN PORTS"
+                                     IsChecked="{Binding IsOpenPortsSection, Mode=OneWay}"
+                                     Command="{Binding ShowOpenPortsCommand}">
                             <RadioButton.Tag>
                                 <TextBlock Text="⬡" Foreground="{DynamicResource Text.Nav}" FontSize="13"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </RadioButton.Tag>
                         </RadioButton>
-                        <RadioButton Style="{StaticResource NavBtn}" Content="WAKE-ON-LAN">
+                        <RadioButton Style="{StaticResource NavBtn}" Content="WAKE-ON-LAN"
+                                     IsChecked="{Binding IsWakeOnLanSection, Mode=OneWay}"
+                                     Command="{Binding ShowWakeOnLanCommand}">
                             <RadioButton.Tag>
                                 <TextBlock Text="⏻" Foreground="{DynamicResource Text.Nav}" FontSize="13"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -973,6 +981,48 @@
                             </StackPanel>
                         </Border>
                     </UniformGrid>
+                </StackPanel>
+            </Border>
+
+
+            <!-- Diagnostics Panel -->
+            <Border Grid.Row="3" Margin="20,14,20,20"
+                    Visibility="{Binding IsDiagnosticsSection, Converter={StaticResource BoolToVis}}"
+                    Background="{DynamicResource Bg.Surface}"
+                    CornerRadius="10"
+                    BorderBrush="{DynamicResource Border.Primary}"
+                    BorderThickness="1"
+                    Padding="20">
+                <StackPanel>
+                    <TextBlock Text="{Binding ActiveSection}" Style="{StaticResource SectionHeader}"/>
+                    <TextBlock Text="Diagnostics toolkit for selected module."
+                               Foreground="{DynamicResource Text.Muted}"
+                               FontFamily="Consolas" FontSize="10" Margin="0,6,0,14"/>
+
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0"
+                                 Text="{Binding DiagnosticTargetIp, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0,0,10,0"
+                                 VerticalContentAlignment="Center"
+                                 Padding="10,6"
+                                 FontFamily="Consolas"/>
+                        <Button Grid.Column="1" Content="RUN" Style="{StaticResource PrimaryBtn}" Command="{Binding RunDiagnosticCommand}"/>
+                    </Grid>
+
+                    <Border Background="{DynamicResource Bg.Card}"
+                            BorderBrush="{DynamicResource Border.Card}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="12">
+                        <TextBlock Text="{Binding DiagnosticOutput}"
+                                   Foreground="{DynamicResource Text.Primary}"
+                                   FontFamily="Consolas"
+                                   TextWrapping="Wrap"/>
+                    </Border>
                 </StackPanel>
             </Border>
         </Grid>

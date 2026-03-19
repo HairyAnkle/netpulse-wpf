@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
+using System.Net;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,6 +24,9 @@ namespace UyKonek.ViewModels
         private bool _backendOnline = true;
         private string _activeSection = "NETWORK SCAN";
         private DeviceModel? _selectedDevice;
+        private string _diagnosticTargetIp = "192.168.1.1";
+        private string _diagnosticOutput = "Select a diagnostics tab and run a check.";
+        private bool _isDiagnosticBusy;
 
         public DashboardViewModel(ApiClientService apiClientService, SettingsService settingsService)
         {
@@ -40,8 +44,12 @@ namespace UyKonek.ViewModels
             ShowDeviceInventoryCommand = new AsyncRelayCommand(ShowDeviceInventoryAsync);
             ShowDeviceDetailsCommand = new AsyncRelayCommand(ShowDeviceDetailsAsync);
             ShowAlertsCommand = new AsyncRelayCommand(ShowAlertsAsync);
+            ShowPingCommand = new AsyncRelayCommand(ShowPingAsync);
+            ShowTracerouteCommand = new AsyncRelayCommand(ShowTracerouteAsync);
+            ShowOpenPortsCommand = new AsyncRelayCommand(ShowOpenPortsAsync);
+            ShowWakeOnLanCommand = new AsyncRelayCommand(ShowWakeOnLanAsync);
+            RunDiagnosticCommand = new AsyncRelayCommand(RunDiagnosticAsync, () => !IsDiagnosticBusy);
 
-            // Sync initial state with ThemeService
             _isDark = App.ThemeService.IsDark;
             App.ThemeService.ThemeChanged += () =>
             {
@@ -65,6 +73,11 @@ namespace UyKonek.ViewModels
         public AsyncRelayCommand ShowDeviceInventoryCommand { get; }
         public AsyncRelayCommand ShowDeviceDetailsCommand { get; }
         public AsyncRelayCommand ShowAlertsCommand { get; }
+        public AsyncRelayCommand ShowPingCommand { get; }
+        public AsyncRelayCommand ShowTracerouteCommand { get; }
+        public AsyncRelayCommand ShowOpenPortsCommand { get; }
+        public AsyncRelayCommand ShowWakeOnLanCommand { get; }
+        public AsyncRelayCommand RunDiagnosticCommand { get; }
 
         public string BackendUrl { get; }
 
@@ -74,10 +87,7 @@ namespace UyKonek.ViewModels
             private set => SetProperty(ref _isDark, value);
         }
 
-        /// <summary>Icon shown on the toggle button (sun in dark, moon in light).</summary>
         public string ThemeIcon => _isDark ? "☀" : "☾";
-
-        /// <summary>Tooltip/label for the toggle button.</summary>
         public string ThemeLabel => _isDark ? "LIGHT MODE" : "DARK MODE";
 
         public bool IsScanning
@@ -93,6 +103,30 @@ namespace UyKonek.ViewModels
                     OnPropertyChanged(nameof(ScanStatusDetail));
                 }
             }
+        }
+
+        public bool IsDiagnosticBusy
+        {
+            get => _isDiagnosticBusy;
+            private set
+            {
+                if (SetProperty(ref _isDiagnosticBusy, value))
+                {
+                    RunDiagnosticCommand.RaiseCanExecuteChanged();
+                }
+            }
+        }
+
+        public string DiagnosticTargetIp
+        {
+            get => _diagnosticTargetIp;
+            set => SetProperty(ref _diagnosticTargetIp, value);
+        }
+
+        public string DiagnosticOutput
+        {
+            get => _diagnosticOutput;
+            private set => SetProperty(ref _diagnosticOutput, value);
         }
 
         public string StatusMessage
@@ -152,22 +186,27 @@ namespace UyKonek.ViewModels
                     OnPropertyChanged(nameof(IsDeviceDetailsSection));
                     OnPropertyChanged(nameof(IsAlertsSection));
                     OnPropertyChanged(nameof(IsDeviceTableSection));
+                    OnPropertyChanged(nameof(IsPingSection));
+                    OnPropertyChanged(nameof(IsTracerouteSection));
+                    OnPropertyChanged(nameof(IsOpenPortsSection));
+                    OnPropertyChanged(nameof(IsWakeOnLanSection));
+                    OnPropertyChanged(nameof(IsDiagnosticsSection));
                 }
             }
         }
 
         public bool IsNetworkScanSection => string.Equals(ActiveSection, "NETWORK SCAN", StringComparison.Ordinal);
-
         public bool IsDeviceInventorySection => string.Equals(ActiveSection, "DEVICE INVENTORY", StringComparison.Ordinal);
-
         public bool IsDeviceDetailsSection => string.Equals(ActiveSection, "DEVICE DETAILS", StringComparison.Ordinal);
-
         public bool IsAlertsSection => string.Equals(ActiveSection, "ALERTS", StringComparison.Ordinal);
-
+        public bool IsPingSection => string.Equals(ActiveSection, "PING", StringComparison.Ordinal);
+        public bool IsTracerouteSection => string.Equals(ActiveSection, "TRACEROUTE", StringComparison.Ordinal);
+        public bool IsOpenPortsSection => string.Equals(ActiveSection, "OPEN PORTS", StringComparison.Ordinal);
+        public bool IsWakeOnLanSection => string.Equals(ActiveSection, "WAKE-ON-LAN", StringComparison.Ordinal);
+        public bool IsDiagnosticsSection => IsPingSection || IsTracerouteSection || IsOpenPortsSection || IsWakeOnLanSection;
         public bool IsDeviceTableSection => IsNetworkScanSection || IsDeviceInventorySection;
 
         public int UnknownVendorCount => Devices.Count(d => string.IsNullOrWhiteSpace(d.Vendor) || d.Vendor == "Unknown");
-
         public int NewAlertCount => NewDevicesCount + UnknownVendorCount;
 
         public DeviceModel? SelectedDevice
@@ -183,8 +222,6 @@ namespace UyKonek.ViewModels
         }
 
         public bool HasSelectedDevice => SelectedDevice is not null;
-
-        // ── Commands ────────────────────────────────────────────
 
         private async Task ScanAsync()
         {
@@ -255,39 +292,86 @@ namespace UyKonek.ViewModels
             return Task.CompletedTask;
         }
 
-        private Task ShowNetworkScanAsync()
+        private Task ShowNetworkScanAsync() => SetSectionAsync("NETWORK SCAN", Devices.Count > 0
+            ? $"Scan complete: {Devices.Count} hosts discovered"
+            : "Ready to scan");
+
+        private Task ShowDeviceInventoryAsync() => SetSectionAsync("DEVICE INVENTORY", Devices.Count > 0
+            ? $"Inventory loaded: {Devices.Count} device(s)"
+            : "No devices in inventory yet");
+
+        private Task ShowDeviceDetailsAsync() => SetSectionAsync("DEVICE DETAILS", SelectedDevice is null
+            ? "Select a device from Network Scan/Inventory to view details"
+            : $"Viewing details for {SelectedDevice.Ip}");
+
+        private Task ShowAlertsAsync() => SetSectionAsync("ALERTS", NewAlertCount > 0
+            ? $"{NewAlertCount} alert signal(s) detected"
+            : "No alerts at the moment");
+
+        private Task ShowPingAsync() => SetSectionAsync("PING", "Run a live ping diagnostic against a target IP.");
+
+        private Task ShowTracerouteAsync() => SetSectionAsync("TRACEROUTE", "Traceroute module ready. Enter target IP and run diagnostics.");
+
+        private Task ShowOpenPortsAsync() => SetSectionAsync("OPEN PORTS", "Scan common open ports on a target IP.");
+
+        private Task ShowWakeOnLanAsync() => SetSectionAsync("WAKE-ON-LAN", "Wake-on-LAN helper ready. Enter target IP to resolve host first.");
+
+        private async Task RunDiagnosticAsync()
         {
-            ActiveSection = "NETWORK SCAN";
-            StatusMessage = Devices.Count > 0
-                ? $"Scan complete: {Devices.Count} hosts discovered"
-                : "Ready to scan";
-            return Task.CompletedTask;
+            if (!IsDiagnosticsSection)
+            {
+                DiagnosticOutput = "Select a diagnostics tab first.";
+                return;
+            }
+
+            if (!IPAddress.TryParse(DiagnosticTargetIp, out _))
+            {
+                DiagnosticOutput = "Invalid target IP address.";
+                return;
+            }
+
+            IsDiagnosticBusy = true;
+            try
+            {
+                switch (ActiveSection)
+                {
+                    case "PING":
+                        var ping = await _apiClientService.PingAsync(DiagnosticTargetIp, CancellationToken.None);
+                        DiagnosticOutput = ping.Alive
+                            ? $"PING {ping.Ip}: Alive (latency {ping.LatencyMs} ms)"
+                            : $"PING {ping.Ip}: Host did not respond";
+                        break;
+                    case "OPEN PORTS":
+                        var ports = await _apiClientService.ScanPortsAsync(DiagnosticTargetIp, CancellationToken.None);
+                        DiagnosticOutput = ports.OpenPorts.Length > 0
+                            ? $"OPEN PORTS {ports.Ip}: {string.Join(", ", ports.OpenPorts)}"
+                            : $"OPEN PORTS {ports.Ip}: No common ports detected as open";
+                        break;
+                    case "TRACEROUTE":
+                        DiagnosticOutput = "Traceroute backend endpoint is not yet implemented; this tab is UI-ready.";
+                        break;
+                    case "WAKE-ON-LAN":
+                        DiagnosticOutput = "Wake-on-LAN backend endpoint is not yet implemented; this tab is UI-ready.";
+                        break;
+                    default:
+                        DiagnosticOutput = "Unsupported diagnostics section.";
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                DiagnosticOutput = $"Diagnostics failed: {ex.Message}";
+            }
+            finally
+            {
+                IsDiagnosticBusy = false;
+            }
         }
 
-        private Task ShowDeviceInventoryAsync()
+        private Task SetSectionAsync(string section, string status)
         {
-            ActiveSection = "DEVICE INVENTORY";
-            StatusMessage = Devices.Count > 0
-                ? $"Inventory loaded: {Devices.Count} device(s)"
-                : "No devices in inventory yet";
-            return Task.CompletedTask;
-        }
-
-        private Task ShowDeviceDetailsAsync()
-        {
-            ActiveSection = "DEVICE DETAILS";
-            StatusMessage = SelectedDevice is null
-                ? "Select a device from Network Scan/Inventory to view details"
-                : $"Viewing details for {SelectedDevice.Ip}";
-            return Task.CompletedTask;
-        }
-
-        private Task ShowAlertsAsync()
-        {
-            ActiveSection = "ALERTS";
-            StatusMessage = NewAlertCount > 0
-                ? $"{NewAlertCount} alert signal(s) detected"
-                : "No alerts at the moment";
+            ActiveSection = section;
+            StatusMessage = status;
             return Task.CompletedTask;
         }
 
@@ -299,8 +383,6 @@ namespace UyKonek.ViewModels
             OnPropertyChanged(nameof(ScanStatusLabel));
             OnPropertyChanged(nameof(ScanStatusDetail));
         }
-
-        // ── INotifyPropertyChanged ───────────────────────────────
 
         private bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string? propertyName = null)
         {
