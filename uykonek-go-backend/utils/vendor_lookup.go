@@ -14,16 +14,11 @@ type VendorLookup struct {
 }
 
 func NewVendorLookup(path string) *VendorLookup {
-	vl := &VendorLookup{prefixes: map[string]string{
-		"00:1A:2B": "Cisco",
-		"F0:18:98": "Samsung",
-		"3C:5A:B4": "Google",
-		"D8:BB:2C": "Apple",
-	}}
+	vl := &VendorLookup{prefixes: map[string]string{}}
 
 	resolved := resolveOUIPath(path)
 	if resolved == "" {
-		log.Printf("OUI lookup file not found, using built-in sample map only")
+		log.Printf("OUI lookup file not found; vendor lookups will return Unknown until data file is available")
 		return vl
 	}
 

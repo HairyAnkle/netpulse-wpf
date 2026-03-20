@@ -25,7 +25,7 @@ namespace UyKonek.ViewModels
         private string _activeSection = "NETWORK SCAN";
         private DeviceModel? _selectedDevice;
         private DeviceModel? _diagnosticTargetDevice;
-        private string _diagnosticTargetIp = "192.168.1.1";
+        private string _diagnosticTargetIp = string.Empty;
         private string _diagnosticOutput = "Select diagnostics tab, pick device/target, then run.";
         private bool _isDiagnosticBusy;
         private long _pingLatencyMs;
