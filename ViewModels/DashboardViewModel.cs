@@ -508,6 +508,7 @@ public sealed class DashboardViewModel : INotifyPropertyChanged
         {
             return;
         }
+    }
 
         IsPingRunning = true;
         PingResults.Clear();
@@ -663,6 +664,7 @@ public sealed class DashboardViewModel : INotifyPropertyChanged
                 });
             }
         }
+    }
 
         ScannedCount = PortResults.Count;
         OnPropertyChanged(nameof(OpenCount));
