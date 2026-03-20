@@ -504,16 +504,22 @@ public sealed class DashboardViewModel : INotifyPropertyChanged
 
     private async Task StartPingAsync()
     {
-        if (string.IsNullOrWhiteSpace(PingTarget)) return;
+        if (string.IsNullOrWhiteSpace(PingTarget))
+        {
+            return;
+        }
+    }
+
         IsPingRunning = true;
         PingResults.Clear();
         PingOutput = string.Empty;
         _pingCts = new CancellationTokenSource();
+
         var latencies = new List<long>();
         var failures = 0;
         var totalPackets = PacketCount <= 0 ? int.MaxValue : PacketCount;
 
-        for (var i = 1; i <= totalPackets && !_pingCts.IsCancellationRequested; i++)
+        for (var sequence = 1; sequence <= totalPackets && !_pingCts.IsCancellationRequested; sequence++)
         {
             try
             {
@@ -521,24 +527,46 @@ public sealed class DashboardViewModel : INotifyPropertyChanged
                 if (reply.Alive)
                 {
                     latencies.Add(reply.LatencyMs);
-                    PingResults.Add(new PingResult { SequenceNumber = i, Latency = reply.LatencyMs, Status = "Success" });
-                    PingOutput += $"Reply from {PingTarget}: time={reply.LatencyMs}ms\n";
+                    PingResults.Add(new PingResult
+                    {
+                        SequenceNumber = sequence,
+                        Latency = reply.LatencyMs,
+                        Status = "Success"
+                    });
+                    PingOutput += $"Reply from {PingTarget}: time={reply.LatencyMs}ms{Environment.NewLine}";
                 }
                 else
                 {
                     failures++;
-                    PingResults.Add(new PingResult { SequenceNumber = i, Latency = 0, Status = "Timeout" });
-                    PingOutput += "Request timed out\n";
+                    PingResults.Add(new PingResult
+                    {
+                        SequenceNumber = sequence,
+                        Latency = 0,
+                        Status = "Timeout"
+                    });
+                    PingOutput += $"Request timed out{Environment.NewLine}";
                 }
             }
             catch
             {
                 failures++;
-                PingResults.Add(new PingResult { SequenceNumber = i, Latency = 0, Status = "Error" });
+                PingResults.Add(new PingResult
+                {
+                    SequenceNumber = sequence,
+                    Latency = 0,
+                    Status = "Error"
+                });
             }
 
-            if (PingResults.Count > 30) PingResults.RemoveAt(0);
-            if (PacketCount <= 0) await Task.Delay(1000, _pingCts.Token);
+            if (PingResults.Count > 30)
+            {
+                PingResults.RemoveAt(0);
+            }
+
+            if (PacketCount <= 0)
+            {
+                await Task.Delay(1000, _pingCts.Token);
+            }
         }
 
         if (latencies.Count > 0)
@@ -547,7 +575,6 @@ public sealed class DashboardViewModel : INotifyPropertyChanged
             PingMax = latencies.Max();
             PingAvg = latencies.Average();
         }
-    }
 
         var sent = latencies.Count + failures;
         PingPacketLoss = sent == 0 ? 0 : failures * 100.0 / sent;
@@ -637,6 +664,7 @@ public sealed class DashboardViewModel : INotifyPropertyChanged
                 });
             }
         }
+    }
 
         ScannedCount = PortResults.Count;
         OnPropertyChanged(nameof(OpenCount));
