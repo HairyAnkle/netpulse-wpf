@@ -547,6 +547,7 @@ public sealed class DashboardViewModel : INotifyPropertyChanged
             PingMax = latencies.Max();
             PingAvg = latencies.Average();
         }
+    }
 
         var sent = latencies.Count + failures;
         PingPacketLoss = sent == 0 ? 0 : failures * 100.0 / sent;
