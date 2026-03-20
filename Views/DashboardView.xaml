@@ -2,6 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:conv="clr-namespace:UyKonek.Converters"
+             xmlns:models="clr-namespace:UyKonek.Models"
              Background="{DynamicResource Bg.Window}">
 
     <UserControl.Resources>
@@ -666,7 +667,7 @@
                         <Border Style="{StaticResource Card}" Margin="4,0">
                             <StackPanel>
                                 <TextBlock Text="ONLINE" Style="{StaticResource SectionLbl}"/>
-                                <TextBlock Text="{Binding Devices.Count}" Foreground="{DynamicResource Color.Success}"
+                                <TextBlock Text="{Binding OnlineDevicesCount}" Foreground="{DynamicResource Color.Success}"
                                            FontFamily="Consolas" FontSize="32" FontWeight="Bold" Margin="0,4,0,0"/>
                                 <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                                     <Ellipse Width="6" Height="6" Fill="{DynamicResource Color.Success}" VerticalAlignment="Center" Margin="0,0,6,0">
@@ -682,7 +683,7 @@
                         <Border Style="{StaticResource Card}" Margin="4,0">
                             <StackPanel>
                                 <TextBlock Text="NEW DEVICES" Style="{StaticResource SectionLbl}"/>
-                                <TextBlock Text="0" Foreground="{DynamicResource Color.Warning}"
+                                <TextBlock Text="{Binding NewDevicesCount}" Foreground="{DynamicResource Color.Warning}"
                                            FontFamily="Consolas" FontSize="32" FontWeight="Bold" Margin="0,4,0,0"/>
                                 <TextBlock Text="since last scan" Foreground="{DynamicResource Text.Muted}"
                                            FontFamily="Consolas" FontSize="10" Margin="0,2,0,0"/>
@@ -692,7 +693,7 @@
                         <Border Style="{StaticResource Card}" Margin="8,0,0,0">
                             <StackPanel>
                                 <TextBlock Text="LAST SCAN" Style="{StaticResource SectionLbl}"/>
-                                <TextBlock Text="—" Foreground="{DynamicResource Text.Primary}"
+                                <TextBlock Text="{Binding ScanDuration}" Foreground="{DynamicResource Text.Primary}"
                                            FontFamily="Consolas" FontSize="24" FontWeight="Bold" Margin="0,4,0,0"/>
                                 <TextBlock Text="duration / ms" Foreground="{DynamicResource Text.Muted}"
                                            FontFamily="Consolas" FontSize="10" Margin="0,2,0,0"/>
@@ -711,59 +712,22 @@
                         <Border Style="{StaticResource Card}" Margin="0,0,12,0">
                             <StackPanel>
                                 <TextBlock Text="DEVICE VENDORS" Style="{StaticResource SectionLbl}" Margin="0,0,0,14"/>
-                                <!-- Bar chart rows — static demo data, wire to real data via ItemsControl -->
-                                <StackPanel>
-                                    <Grid Margin="0,0,0,10">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="100"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="30"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Apple" Foreground="{DynamicResource Text.Secondary}" FontFamily="Consolas" FontSize="11" VerticalAlignment="Center"/>
-                                        <ProgressBar Grid.Column="1" Value="72" Maximum="100" Style="{StaticResource MeterBar}" VerticalAlignment="Center"/>
-                                        <TextBlock Grid.Column="2" Text="72%" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="10" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                    </Grid>
-                                    <Grid Margin="0,0,0,10">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="100"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="30"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Samsung" Foreground="{DynamicResource Text.Secondary}" FontFamily="Consolas" FontSize="11" VerticalAlignment="Center"/>
-                                        <ProgressBar Grid.Column="1" Value="45" Maximum="100" Style="{StaticResource MeterBarGreen}" VerticalAlignment="Center"/>
-                                        <TextBlock Grid.Column="2" Text="45%" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="10" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                    </Grid>
-                                    <Grid Margin="0,0,0,10">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="100"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="30"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="TP-Link" Foreground="{DynamicResource Text.Secondary}" FontFamily="Consolas" FontSize="11" VerticalAlignment="Center"/>
-                                        <ProgressBar Grid.Column="1" Value="28" Maximum="100" Style="{StaticResource MeterBarOrange}" VerticalAlignment="Center"/>
-                                        <TextBlock Grid.Column="2" Text="28%" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="10" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                    </Grid>
-                                    <Grid Margin="0,0,0,10">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="100"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="30"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Unknown" Foreground="{DynamicResource Text.Secondary}" FontFamily="Consolas" FontSize="11" VerticalAlignment="Center"/>
-                                        <ProgressBar Grid.Column="1" Value="15" Maximum="100" Style="{StaticResource MeterBarRed}" VerticalAlignment="Center"/>
-                                        <TextBlock Grid.Column="2" Text="15%" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="10" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                    </Grid>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="100"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="30"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Cisco" Foreground="{DynamicResource Text.Secondary}" FontFamily="Consolas" FontSize="11" VerticalAlignment="Center"/>
-                                        <ProgressBar Grid.Column="1" Value="10" Maximum="100" Style="{StaticResource MeterBar}" VerticalAlignment="Center"/>
-                                        <TextBlock Grid.Column="2" Text="10%" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="10" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                    </Grid>
-                                </StackPanel>
+                                <ItemsControl ItemsSource="{Binding VendorStats}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,0,0,10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="120"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="40"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding Vendor}" Foreground="{DynamicResource Text.Secondary}" FontFamily="Consolas" FontSize="11" VerticalAlignment="Center"/>
+                                                <ProgressBar Grid.Column="1" Value="{Binding Percent}" Maximum="100" Style="{StaticResource MeterBar}" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="2" Text="{Binding Count}" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="10" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
                             </StackPanel>
                         </Border>
 
@@ -798,24 +762,18 @@
                                                FontFamily="Consolas" FontSize="9"/>
                                 </Canvas>
                                 <!-- Legend -->
-                                <StackPanel Margin="0,12,0,0">
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                        <Ellipse Width="8" Height="8" Fill="{DynamicResource Color.Accent}" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="Mobile  45%" Foreground="{DynamicResource Text.Secondary}" FontFamily="Consolas" FontSize="10"/>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                        <Ellipse Width="8" Height="8" Fill="{DynamicResource Color.Success}" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="Router  25%" Foreground="{DynamicResource Text.Secondary}" FontFamily="Consolas" FontSize="10"/>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                        <Ellipse Width="8" Height="8" Fill="{DynamicResource Color.Warning}" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="PC      20%" Foreground="{DynamicResource Text.Secondary}" FontFamily="Consolas" FontSize="10"/>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Ellipse Width="8" Height="8" Fill="{DynamicResource Color.Pink}" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="IoT     10%" Foreground="{DynamicResource Text.Secondary}" FontFamily="Consolas" FontSize="10"/>
-                                    </StackPanel>
-                                </StackPanel>
+                                <ItemsControl ItemsSource="{Binding DeviceTypeStats}" Margin="0,12,0,0">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                                <Ellipse Width="8" Height="8" Fill="{DynamicResource Color.Accent}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding Label}" Foreground="{DynamicResource Text.Secondary}" FontFamily="Consolas" FontSize="10"/>
+                                                <TextBlock Text="  " Foreground="{DynamicResource Text.Secondary}" FontFamily="Consolas" FontSize="10"/>
+                                                <TextBlock Text="{Binding Percent, StringFormat={}{0:F0}%}" Foreground="{DynamicResource Text.Secondary}" FontFamily="Consolas" FontSize="10"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
                             </StackPanel>
                         </Border>
                     </Grid>
@@ -929,39 +887,18 @@
                                            FontFamily="Consolas" FontSize="9"/>
                             </Grid>
                             <!-- Sparkline graph (WPF Polyline) -->
-                            <Canvas Height="80" Background="Transparent">
-                                <!-- Grid lines -->
-                                <Line X1="0" Y1="0"  X2="800" Y2="0"  Stroke="{DynamicResource Border.Card}" StrokeThickness="0.5" StrokeDashArray="4,4"/>
-                                <Line X1="0" Y1="27" X2="800" Y2="27" Stroke="{DynamicResource Border.Card}" StrokeThickness="0.5" StrokeDashArray="4,4"/>
-                                <Line X1="0" Y1="54" X2="800" Y2="54" Stroke="{DynamicResource Border.Card}" StrokeThickness="0.5" StrokeDashArray="4,4"/>
-                                <Line X1="0" Y1="80" X2="800" Y2="80" Stroke="{DynamicResource Border.Card}" StrokeThickness="0.5" StrokeDashArray="4,4"/>
-                                <!-- Area fill -->
-                                <Polygon Points="0,80 50,55 120,45 200,60 290,35 380,28 460,42 550,18 630,30 800,80" Fill="{DynamicResource Color.Accent}" Opacity="0.06"/>
-                                <!-- Sparkline -->
-                                <Polyline Points="0,55 50,55 120,45 200,60 290,35 380,28 460,42 550,18 630,30" Stroke="{DynamicResource Color.Accent}"
-                                          StrokeThickness="2" StrokeLineJoin="Round">
-                                    <Polyline.Effect>
-                                        <DropShadowEffect Color="#00E5FF" BlurRadius="6" ShadowDepth="0" Opacity="0.4"/>
-                                    </Polyline.Effect>
-                                </Polyline>
-                                <!-- Data point dots -->
-                                <Ellipse Canvas.Left="47" Canvas.Top="52" Width="6" Height="6" Fill="{DynamicResource Color.Accent}"/>
-                                <Ellipse Canvas.Left="117" Canvas.Top="42" Width="6" Height="6" Fill="{DynamicResource Color.Accent}"/>
-                                <Ellipse Canvas.Left="197" Canvas.Top="57" Width="6" Height="6" Fill="{DynamicResource Color.Accent}"/>
-                                <Ellipse Canvas.Left="287" Canvas.Top="32" Width="6" Height="6" Fill="{DynamicResource Color.Accent}"/>
-                                <Ellipse Canvas.Left="377" Canvas.Top="25" Width="6" Height="6" Fill="{DynamicResource Color.Accent}"/>
-                                <Ellipse Canvas.Left="457" Canvas.Top="39" Width="6" Height="6" Fill="{DynamicResource Color.Accent}"/>
-                                <Ellipse Canvas.Left="547" Canvas.Top="15" Width="6" Height="6" Fill="{DynamicResource Color.Accent}"/>
-                                <Ellipse Canvas.Left="627" Canvas.Top="27" Width="6" Height="6" Fill="{DynamicResource Color.Accent}">
-                                    <Ellipse.Effect>
-                                        <DropShadowEffect Color="#00E5FF" BlurRadius="8" ShadowDepth="0"/>
-                                    </Ellipse.Effect>
-                                </Ellipse>
-                                <!-- Y-axis labels -->
-                                <TextBlock Canvas.Left="0" Canvas.Top="-4" Text="20" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="8"/>
-                                <TextBlock Canvas.Left="0" Canvas.Top="23" Text="15" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="8"/>
-                                <TextBlock Canvas.Left="0" Canvas.Top="50" Text="10" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="8"/>
-                            </Canvas>
+                            <ItemsControl ItemsSource="{Binding ScanHistory}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Rows="1"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Height="{Binding}" Width="16" Margin="2,0" VerticalAlignment="Bottom" Background="{DynamicResource Color.Accent}" Opacity="0.7"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </StackPanel>
                     </Border>
 
@@ -1141,7 +1078,7 @@
                             <TextBlock Text="Named devices stored from your scans" Style="{StaticResource PageSub}"/>
                         </StackPanel>
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
-                            <Button Content="ADD DEVICE" Style="{StaticResource PrimaryBtn}"/>
+                            <Button Content="ADD DEVICE" Style="{StaticResource PrimaryBtn}" Command="{Binding AddDeviceCommand}"/>
                         </StackPanel>
                     </Grid>
 
@@ -1153,7 +1090,7 @@
                                 <ColumnDefinition Width="160"/>
                                 <ColumnDefinition Width="140"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox Style="{StaticResource InputBox}" Text="" Margin="0,0,12,0">
+                            <TextBox Style="{StaticResource InputBox}" Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0">
                                 <TextBox.Tag>Search by name, IP or MAC…</TextBox.Tag>
                             </TextBox>
                             <ComboBox Grid.Column="1" Style="{StaticResource ComboStyle}" Margin="0,0,12,0">
@@ -1176,28 +1113,28 @@
                         <Border Style="{StaticResource Card}" Margin="0,0,8,0">
                             <StackPanel>
                                 <TextBlock Text="TOTAL NAMED" Style="{StaticResource SectionLbl}"/>
-                                <TextBlock Text="0" Foreground="{DynamicResource Color.Accent}"
+                                <TextBlock Text="{Binding NamedCount}" Foreground="{DynamicResource Color.Accent}"
                                            FontFamily="Consolas" FontSize="28" FontWeight="Bold" Margin="0,4,0,0"/>
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource Card}" Margin="4,0">
                             <StackPanel>
                                 <TextBlock Text="ONLINE NOW" Style="{StaticResource SectionLbl}"/>
-                                <TextBlock Text="0" Foreground="{DynamicResource Color.Success}"
+                                <TextBlock Text="{Binding OnlineCount}" Foreground="{DynamicResource Color.Success}"
                                            FontFamily="Consolas" FontSize="28" FontWeight="Bold" Margin="0,4,0,0"/>
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource Card}" Margin="4,0">
                             <StackPanel>
                                 <TextBlock Text="OFFLINE" Style="{StaticResource SectionLbl}"/>
-                                <TextBlock Text="0" Foreground="{DynamicResource Text.Secondary}"
+                                <TextBlock Text="{Binding OfflineCount}" Foreground="{DynamicResource Text.Secondary}"
                                            FontFamily="Consolas" FontSize="28" FontWeight="Bold" Margin="0,4,0,0"/>
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource Card}" Margin="8,0,0,0">
                             <StackPanel>
                                 <TextBlock Text="UNNAMED" Style="{StaticResource SectionLbl}"/>
-                                <TextBlock Text="0" Foreground="{DynamicResource Color.Warning}"
+                                <TextBlock Text="{Binding UnnamedCount}" Foreground="{DynamicResource Color.Warning}"
                                            FontFamily="Consolas" FontSize="28" FontWeight="Bold" Margin="0,4,0,0"/>
                             </StackPanel>
                         </Border>
@@ -1379,7 +1316,7 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="Avg Latency" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="11"/>
-                                    <TextBlock Grid.Column="1" Text="12 ms" Foreground="{DynamicResource Color.Accent}" FontFamily="Consolas" FontSize="11" FontWeight="Bold"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding SelectedDeviceLatency}" Foreground="{DynamicResource Color.Accent}" FontFamily="Consolas" FontSize="11" FontWeight="Bold"/>
                                 </Grid>
                                 <Grid Margin="0,0,0,12">
                                     <Grid.ColumnDefinitions>
@@ -1387,7 +1324,7 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="Open Ports" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="11"/>
-                                    <TextBlock Grid.Column="1" Text="—" Foreground="{DynamicResource Color.Warning}" FontFamily="Consolas" FontSize="11" FontWeight="Bold"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding SelectedDeviceOpenPorts}" Foreground="{DynamicResource Color.Warning}" FontFamily="Consolas" FontSize="11" FontWeight="Bold"/>
                                 </Grid>
                                 <TextBlock Text="CONNECTION QUALITY" Style="{StaticResource SectionLbl}" Margin="0,0,0,8"/>
                                 <StackPanel>
@@ -1398,8 +1335,8 @@
                                             <ColumnDefinition Width="35"/>
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="Signal" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="10"/>
-                                        <ProgressBar Grid.Column="1" Value="85" Maximum="100" Style="{StaticResource MeterBarGreen}" VerticalAlignment="Center"/>
-                                        <TextBlock Grid.Column="2" Text="85%" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="9" HorizontalAlignment="Right"/>
+                                        <ProgressBar Grid.Column="1" Value="{Binding SelectedDeviceSignal}" Maximum="100" Style="{StaticResource MeterBarGreen}" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding SelectedDeviceSignal, StringFormat={}{0:F0}%}" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="9" HorizontalAlignment="Right"/>
                                     </Grid>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -1408,8 +1345,8 @@
                                             <ColumnDefinition Width="35"/>
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="Uptime" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="10"/>
-                                        <ProgressBar Grid.Column="1" Value="99" Maximum="100" Style="{StaticResource MeterBar}" VerticalAlignment="Center"/>
-                                        <TextBlock Grid.Column="2" Text="99%" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="9" HorizontalAlignment="Right"/>
+                                        <ProgressBar Grid.Column="1" Value="{Binding SelectedDeviceUptime}" Maximum="100" Style="{StaticResource MeterBar}" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding SelectedDeviceUptime, StringFormat={}{0:F0}%}" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="9" HorizontalAlignment="Right"/>
                                     </Grid>
                                 </StackPanel>
                             </StackPanel>
@@ -1421,8 +1358,8 @@
                         <StackPanel>
                             <TextBlock Text="QUICK ACTIONS" Style="{StaticResource SectionLbl}" Margin="0,0,0,12"/>
                             <StackPanel Orientation="Horizontal">
-                                <Button Content="PING DEVICE"    Style="{StaticResource GhostBtn}" Margin="0,0,8,0"/>
-                                <Button Content="SCAN PORTS"     Style="{StaticResource GhostBtn}" Margin="0,0,8,0"/>
+                                <Button Content="PING DEVICE"    Style="{StaticResource GhostBtn}" Margin="0,0,8,0" Command="{Binding PingSelectedCommand}"/>
+                                <Button Content="SCAN PORTS"     Style="{StaticResource GhostBtn}" Margin="0,0,8,0" Command="{Binding ScanPortsForSelectedCommand}"/>
                                 <Button Content="TRACEROUTE"     Style="{StaticResource GhostBtn}" Margin="0,0,8,0"/>
                                 <Button Content="WAKE-ON-LAN"    Style="{StaticResource GhostBtn}" Margin="0,0,8,0"/>
                                 <Button Content="COPY IP"        Style="{StaticResource GhostBtn}" Command="{Binding CopyIpCommand}" Margin="0,0,8,0"/>
@@ -1459,8 +1396,8 @@
                             <TextBlock Text="New device detections and network events" Style="{StaticResource PageSub}"/>
                         </StackPanel>
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
-                            <Button Content="CLEAR ALL" Style="{StaticResource DangerBtn}" Margin="0,0,8,0"/>
-                            <Button Content="SETTINGS"  Style="{StaticResource GhostBtn}"/>
+                            <Button Content="CLEAR ALL" Style="{StaticResource DangerBtn}" Margin="0,0,8,0" Command="{Binding ClearAllAlertsCommand}"/>
+                            <Button Content="MARK READ"  Style="{StaticResource GhostBtn}" Command="{Binding MarkAllReadCommand}"/>
                         </StackPanel>
                     </Grid>
 
@@ -1469,25 +1406,25 @@
                         <Border Style="{StaticResource Card}" Margin="0,0,8,0">
                             <StackPanel>
                                 <TextBlock Text="TOTAL ALERTS" Style="{StaticResource SectionLbl}"/>
-                                <TextBlock Text="0" Foreground="{DynamicResource Text.Primary}" FontFamily="Consolas" FontSize="28" FontWeight="Bold" Margin="0,4,0,0"/>
+                                <TextBlock Text="{Binding TotalAlerts}" Foreground="{DynamicResource Text.Primary}" FontFamily="Consolas" FontSize="28" FontWeight="Bold" Margin="0,4,0,0"/>
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource Card}" Margin="4,0">
                             <StackPanel>
                                 <TextBlock Text="NEW DEVICES" Style="{StaticResource SectionLbl}"/>
-                                <TextBlock Text="0" Foreground="{DynamicResource Color.Warning}" FontFamily="Consolas" FontSize="28" FontWeight="Bold" Margin="0,4,0,0"/>
+                                <TextBlock Text="{Binding NewDeviceAlerts}" Foreground="{DynamicResource Color.Warning}" FontFamily="Consolas" FontSize="28" FontWeight="Bold" Margin="0,4,0,0"/>
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource Card}" Margin="4,0">
                             <StackPanel>
                                 <TextBlock Text="SECURITY" Style="{StaticResource SectionLbl}"/>
-                                <TextBlock Text="0" Foreground="{DynamicResource Color.Danger}" FontFamily="Consolas" FontSize="28" FontWeight="Bold" Margin="0,4,0,0"/>
+                                <TextBlock Text="{Binding SecurityAlerts}" Foreground="{DynamicResource Color.Danger}" FontFamily="Consolas" FontSize="28" FontWeight="Bold" Margin="0,4,0,0"/>
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource Card}" Margin="8,0,0,0">
                             <StackPanel>
                                 <TextBlock Text="INFO" Style="{StaticResource SectionLbl}"/>
-                                <TextBlock Text="0" Foreground="{DynamicResource Color.Accent}" FontFamily="Consolas" FontSize="28" FontWeight="Bold" Margin="0,4,0,0"/>
+                                <TextBlock Text="{Binding InfoAlerts}" Foreground="{DynamicResource Color.Accent}" FontFamily="Consolas" FontSize="28" FontWeight="Bold" Margin="0,4,0,0"/>
                             </StackPanel>
                         </Border>
                     </UniformGrid>
@@ -1640,13 +1577,16 @@
                                 <ColumnDefinition Width="120"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox Style="{StaticResource InputBox}" Text="192.168.1.1" Margin="0,0,12,0"/>
-                            <ComboBox Grid.Column="1" Style="{StaticResource ComboStyle}" Margin="0,0,12,0">
-                                <ComboBoxItem Content="4 packets" IsSelected="True"/>
-                                <ComboBoxItem Content="10 packets"/>
-                                <ComboBoxItem Content="Continuous"/>
+                            <TextBox Style="{StaticResource InputBox}" Text="{Binding PingTarget}" Margin="0,0,12,0"/>
+                            <ComboBox Grid.Column="1" Style="{StaticResource ComboStyle}" Margin="0,0,12,0" SelectedValue="{Binding PacketCount}">
+                                <ComboBoxItem Content="4"/>
+                                <ComboBoxItem Content="10"/>
+                                <ComboBoxItem Content="0"/>
                             </ComboBox>
-                            <Button Grid.Column="2" Content="START PING" Style="{StaticResource PrimaryBtn}"/>
+                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                <Button Content="START PING" Style="{StaticResource PrimaryBtn}" Command="{Binding StartPingCommand}" Margin="0,0,8,0"/>
+                                <Button Content="STOP" Style="{StaticResource GhostBtn}" Command="{Binding StopPingCommand}"/>
+                            </StackPanel>
                         </Grid>
                     </Border>
 
@@ -1655,28 +1595,28 @@
                         <Border Style="{StaticResource Card}" Margin="0,0,8,0">
                             <StackPanel>
                                 <TextBlock Text="MIN" Style="{StaticResource SectionLbl}"/>
-                                <TextBlock Text="—" Foreground="{DynamicResource Color.Success}" FontFamily="Consolas" FontSize="28" FontWeight="Bold" Margin="0,4,0,0"/>
+                                <TextBlock Text="{Binding PingMin, StringFormat={}{0:F1}}" Foreground="{DynamicResource Color.Success}" FontFamily="Consolas" FontSize="28" FontWeight="Bold" Margin="0,4,0,0"/>
                                 <TextBlock Text="ms" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="10" Margin="0,2,0,0"/>
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource Card}" Margin="4,0">
                             <StackPanel>
                                 <TextBlock Text="AVG" Style="{StaticResource SectionLbl}"/>
-                                <TextBlock Text="—" Foreground="{DynamicResource Color.Accent}" FontFamily="Consolas" FontSize="28" FontWeight="Bold" Margin="0,4,0,0"/>
+                                <TextBlock Text="{Binding PingAvg, StringFormat={}{0:F1}}" Foreground="{DynamicResource Color.Accent}" FontFamily="Consolas" FontSize="28" FontWeight="Bold" Margin="0,4,0,0"/>
                                 <TextBlock Text="ms" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="10" Margin="0,2,0,0"/>
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource Card}" Margin="4,0">
                             <StackPanel>
                                 <TextBlock Text="MAX" Style="{StaticResource SectionLbl}"/>
-                                <TextBlock Text="—" Foreground="{DynamicResource Color.Warning}" FontFamily="Consolas" FontSize="28" FontWeight="Bold" Margin="0,4,0,0"/>
+                                <TextBlock Text="{Binding PingMax, StringFormat={}{0:F1}}" Foreground="{DynamicResource Color.Warning}" FontFamily="Consolas" FontSize="28" FontWeight="Bold" Margin="0,4,0,0"/>
                                 <TextBlock Text="ms" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="10" Margin="0,2,0,0"/>
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource Card}" Margin="8,0,0,0">
                             <StackPanel>
                                 <TextBlock Text="PACKET LOSS" Style="{StaticResource SectionLbl}"/>
-                                <TextBlock Text="—" Foreground="{DynamicResource Color.Danger}" FontFamily="Consolas" FontSize="28" FontWeight="Bold" Margin="0,4,0,0"/>
+                                <TextBlock Text="{Binding PingPacketLoss, StringFormat={}{0:F1}}" Foreground="{DynamicResource Color.Danger}" FontFamily="Consolas" FontSize="28" FontWeight="Bold" Margin="0,4,0,0"/>
                                 <TextBlock Text="%" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="10" Margin="0,2,0,0"/>
                             </StackPanel>
                         </Border>
@@ -1693,28 +1633,21 @@
                                 <TextBlock Text="LATENCY OVER TIME" Style="{StaticResource SectionLbl}"/>
                                 <TextBlock Grid.Column="1" Text="ms per packet" Foreground="{DynamicResource Text.Dim}" FontFamily="Consolas" FontSize="9"/>
                             </Grid>
-                            <!-- Vertical bar chart canvas -->
-                            <Canvas Height="120" Background="Transparent">
-                                <!-- Grid lines -->
-                                <Line X1="0" Y1="0"  X2="800" Y2="0"  Stroke="{DynamicResource Border.Card}" StrokeThickness="0.5" StrokeDashArray="4,4"/>
-                                <Line X1="0" Y1="40" X2="800" Y2="40" Stroke="{DynamicResource Border.Card}" StrokeThickness="0.5" StrokeDashArray="4,4"/>
-                                <Line X1="0" Y1="80" X2="800" Y2="80" Stroke="{DynamicResource Border.Card}" StrokeThickness="0.5" StrokeDashArray="4,4"/>
-                                <!-- Bars (10 packets demo) -->
-                                <Rectangle Canvas.Left="20"  Canvas.Top="90" Width="30" Height="30"  Fill="{DynamicResource Color.Accent}" Opacity="0.7" RadiusX="3" RadiusY="3"/>
-                                <Rectangle Canvas.Left="70"  Canvas.Top="80" Width="30" Height="40"  Fill="{DynamicResource Color.Accent}" Opacity="0.7" RadiusX="3" RadiusY="3"/>
-                                <Rectangle Canvas.Left="120" Canvas.Top="95" Width="30" Height="25"  Fill="{DynamicResource Color.Success}" Opacity="0.8" RadiusX="3" RadiusY="3"/>
-                                <Rectangle Canvas.Left="170" Canvas.Top="85" Width="30" Height="35"  Fill="{DynamicResource Color.Accent}" Opacity="0.7" RadiusX="3" RadiusY="3"/>
-                                <Rectangle Canvas.Left="220" Canvas.Top="60" Width="30" Height="60"  Fill="{DynamicResource Color.Warning}" Opacity="0.8" RadiusX="3" RadiusY="3"/>
-                                <Rectangle Canvas.Left="270" Canvas.Top="88" Width="30" Height="32"  Fill="{DynamicResource Color.Accent}" Opacity="0.7" RadiusX="3" RadiusY="3"/>
-                                <Rectangle Canvas.Left="320" Canvas.Top="92" Width="30" Height="28"  Fill="{DynamicResource Color.Success}" Opacity="0.8" RadiusX="3" RadiusY="3"/>
-                                <Rectangle Canvas.Left="370" Canvas.Top="75" Width="30" Height="45"  Fill="{DynamicResource Color.Accent}" Opacity="0.7" RadiusX="3" RadiusY="3"/>
-                                <Rectangle Canvas.Left="420" Canvas.Top="50" Width="30" Height="70"  Fill="{DynamicResource Color.Danger}" Opacity="0.8" RadiusX="3" RadiusY="3"/>
-                                <Rectangle Canvas.Left="470" Canvas.Top="86" Width="30" Height="34"  Fill="{DynamicResource Color.Accent}" Opacity="0.7" RadiusX="3" RadiusY="3"/>
-                                <!-- Y labels -->
-                                <TextBlock Canvas.Left="0" Canvas.Top="-4" Text="50ms" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="8"/>
-                                <TextBlock Canvas.Left="0" Canvas.Top="36" Text="30ms" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="8"/>
-                                <TextBlock Canvas.Left="0" Canvas.Top="76" Text="10ms" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="8"/>
-                            </Canvas>
+                            <ItemsControl ItemsSource="{Binding PingResults}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Width="18" Height="120">
+                                            <Rectangle Width="14" Height="{Binding Height}" VerticalAlignment="Bottom"
+                                                       Fill="{DynamicResource Color.Accent}" RadiusX="2" RadiusY="2"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </StackPanel>
                     </Border>
 
@@ -1723,9 +1656,7 @@
                         <StackPanel>
                             <TextBlock Text="PING OUTPUT" Style="{StaticResource SectionLbl}" Margin="0,0,0,12"/>
                             <Border Background="{DynamicResource Bg.Window}" CornerRadius="6" Padding="12,10">
-                                <TextBlock FontFamily="Consolas" FontSize="11" Foreground="{DynamicResource Text.Muted}"
-                                           Text="Pinging 192.168.1.1 with 32 bytes of data:&#10;Reply from 192.168.1.1: bytes=32 time=12ms TTL=64&#10;Reply from 192.168.1.1: bytes=32 time=14ms TTL=64&#10;Reply from 192.168.1.1: bytes=32 time=11ms TTL=64&#10;Reply from 192.168.1.1: bytes=32 time=13ms TTL=64&#10;&#10;Ping statistics for 192.168.1.1:&#10;  Packets: Sent = 4, Received = 4, Lost = 0 (0% loss)&#10;Approximate round trip times in milli-seconds:&#10;  Minimum = 11ms, Maximum = 14ms, Average = 12ms"
-                                           TextWrapping="Wrap"/>
+                                <TextBlock FontFamily="Consolas" FontSize="11" Foreground="{DynamicResource Text.Muted}" Text="{Binding PingOutput}" TextWrapping="Wrap"/>
                             </Border>
                         </StackPanel>
                     </Border>
@@ -1755,7 +1686,7 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel>
                             <TextBlock Text="TRACEROUTE" Style="{StaticResource PageTitle}"/>
-                            <TextBlock Text="Map the path data takes from source to destination" Style="{StaticResource PageSub}"/>
+                            <TextBlock Text="{Binding TraceStatus}" Style="{StaticResource PageSub}"/>
                         </StackPanel>
                     </Grid>
 
@@ -1766,8 +1697,8 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox Style="{StaticResource InputBox}" Text="8.8.8.8" Margin="0,0,12,0"/>
-                            <Button Grid.Column="1" Content="TRACE ROUTE" Style="{StaticResource PrimaryBtn}"/>
+                            <TextBox Style="{StaticResource InputBox}" Text="{Binding TraceTarget}" Margin="0,0,12,0"/>
+                            <Button Grid.Column="1" Content="TRACE ROUTE" Style="{StaticResource PrimaryBtn}" Command="{Binding StartTraceCommand}"/>
                         </Grid>
                     </Border>
 
@@ -1975,14 +1906,12 @@
                                 <ColumnDefinition Width="180"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox Style="{StaticResource InputBox}" Text="192.168.1.1" Margin="0,0,12,0"/>
-                            <ComboBox Grid.Column="1" Style="{StaticResource ComboStyle}" Margin="0,0,12,0">
-                                <ComboBoxItem Content="Common ports" IsSelected="True"/>
-                                <ComboBoxItem Content="Full scan (1-65535)"/>
-                                <ComboBoxItem Content="Top 100"/>
-                                <ComboBoxItem Content="Custom range"/>
-                            </ComboBox>
-                            <Button Grid.Column="2" Content="SCAN PORTS" Style="{StaticResource PrimaryBtn}"/>
+                            <TextBox Style="{StaticResource InputBox}" Text="{Binding PortScanTarget}" Margin="0,0,12,0"/>
+                            <ComboBox Grid.Column="1" Style="{StaticResource ComboStyle}" Margin="0,0,12,0" SelectedIndex="0"/>
+                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                <Button Content="SCAN PORTS" Style="{StaticResource PrimaryBtn}" Command="{Binding StartPortScanCommand}" Margin="0,0,8,0"/>
+                                <Button Content="STOP" Style="{StaticResource GhostBtn}" Command="{Binding StopPortScanCommand}"/>
+                            </StackPanel>
                         </Grid>
                     </Border>
 
@@ -2180,7 +2109,7 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="MAC Address" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="11" VerticalAlignment="Center"/>
-                                <TextBox Grid.Column="1" Style="{StaticResource InputBox}" Text="AA:BB:CC:DD:EE:FF"/>
+                                <TextBox Grid.Column="1" Style="{StaticResource InputBox}" Text="{Binding WolMacAddress}"/>
                             </Grid>
                             <Grid Margin="0,0,0,12">
                                 <Grid.ColumnDefinitions>
@@ -2188,7 +2117,7 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Broadcast IP" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="11" VerticalAlignment="Center"/>
-                                <TextBox Grid.Column="1" Style="{StaticResource InputBox}" Text="255.255.255.255"/>
+                                <TextBox Grid.Column="1" Style="{StaticResource InputBox}" Text="{Binding WolBroadcastIp}"/>
                             </Grid>
                             <Grid Margin="0,0,0,16">
                                 <Grid.ColumnDefinitions>
@@ -2196,11 +2125,11 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Port" Foreground="{DynamicResource Text.Muted}" FontFamily="Consolas" FontSize="11" VerticalAlignment="Center"/>
-                                <TextBox Grid.Column="1" Style="{StaticResource InputBox}" Text="9" Width="100" HorizontalAlignment="Left"/>
+                                <TextBox Grid.Column="1" Style="{StaticResource InputBox}" Text="{Binding WolPort}" Width="100" HorizontalAlignment="Left"/>
                             </Grid>
                             <StackPanel Orientation="Horizontal">
-                                <Button Content="SEND MAGIC PACKET" Style="{StaticResource PrimaryBtn}" Margin="0,0,12,0"/>
-                                <Button Content="TEST REACHABILITY"  Style="{StaticResource GhostBtn}"/>
+                                <Button Content="SEND MAGIC PACKET" Style="{StaticResource PrimaryBtn}" Margin="0,0,12,0" Command="{Binding SendWolCommand}"/>
+                                <Button Content="TEST REACHABILITY"  Style="{StaticResource GhostBtn}" Command="{Binding TestReachabilityCommand}"/>
                             </StackPanel>
                         </StackPanel>
                     </Border>
