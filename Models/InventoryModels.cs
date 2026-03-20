@@ -13,11 +13,60 @@ public enum DeviceType
     Unknown,
 }
 
-public sealed class InventoryDevice : DeviceModel, INotifyPropertyChanged
+public sealed class InventoryDevice : INotifyPropertyChanged
 {
+    private string _ip = string.Empty;
+    private string _mac = string.Empty;
+    private string? _hostname;
+    private string? _vendor;
+    private DateTimeOffset _firstSeen;
+    private DateTimeOffset _lastSeen;
+    private bool _isNew;
     private string _customName = string.Empty;
     private DeviceType _deviceType = DeviceType.Unknown;
     private string _notes = string.Empty;
+
+    public string Ip
+    {
+        get => _ip;
+        set => SetProperty(ref _ip, value);
+    }
+
+    public string Mac
+    {
+        get => _mac;
+        set => SetProperty(ref _mac, value);
+    }
+
+    public string? Hostname
+    {
+        get => _hostname;
+        set => SetProperty(ref _hostname, value);
+    }
+
+    public string? Vendor
+    {
+        get => _vendor;
+        set => SetProperty(ref _vendor, value);
+    }
+
+    public DateTimeOffset FirstSeen
+    {
+        get => _firstSeen;
+        set => SetProperty(ref _firstSeen, value);
+    }
+
+    public DateTimeOffset LastSeen
+    {
+        get => _lastSeen;
+        set => SetProperty(ref _lastSeen, value);
+    }
+
+    public bool IsNew
+    {
+        get => _isNew;
+        set => SetProperty(ref _isNew, value);
+    }
 
     public string CustomName
     {
