@@ -408,18 +408,10 @@ public sealed class DashboardViewModel : INotifyPropertyChanged
     private async Task PingSelectedAsync()
     {
         if (SelectedDevice is null) return;
-        using var ping = new Ping();
         try
         {
-            var reply = await ping.SendPingAsync(SelectedDevice.Ip, 1200);
-            if (reply.Status == IPStatus.Success)
-            {
-                SelectedDeviceLatency = $"{reply.RoundtripTime} ms";
-            }
-            else
-            {
-                SelectedDeviceLatency = reply.Status.ToString();
-            }
+            var ping = await _apiClientService.PingAsync(SelectedDevice.Ip, CancellationToken.None);
+            SelectedDeviceLatency = ping.Alive ? $"{ping.LatencyMs} ms" : "unreachable";
         }
         catch
         {
@@ -521,23 +513,22 @@ public sealed class DashboardViewModel : INotifyPropertyChanged
         var failures = 0;
         var totalPackets = PacketCount <= 0 ? int.MaxValue : PacketCount;
 
-        using var ping = new Ping();
         for (var i = 1; i <= totalPackets && !_pingCts.IsCancellationRequested; i++)
         {
             try
             {
-                var reply = await ping.SendPingAsync(PingTarget, 1200);
-                if (reply.Status == IPStatus.Success)
+                var reply = await _apiClientService.PingAsync(PingTarget, _pingCts.Token);
+                if (reply.Alive)
                 {
-                    latencies.Add(reply.RoundtripTime);
-                    PingResults.Add(new PingResult { SequenceNumber = i, Latency = reply.RoundtripTime, Status = "Success" });
-                    PingOutput += $"Reply from {PingTarget}: time={reply.RoundtripTime}ms\n";
+                    latencies.Add(reply.LatencyMs);
+                    PingResults.Add(new PingResult { SequenceNumber = i, Latency = reply.LatencyMs, Status = "Success" });
+                    PingOutput += $"Reply from {PingTarget}: time={reply.LatencyMs}ms\n";
                 }
                 else
                 {
                     failures++;
-                    PingResults.Add(new PingResult { SequenceNumber = i, Latency = 0, Status = reply.Status.ToString() });
-                    PingOutput += $"Request timed out ({reply.Status})\n";
+                    PingResults.Add(new PingResult { SequenceNumber = i, Latency = 0, Status = "Timeout" });
+                    PingOutput += "Request timed out\n";
                 }
             }
             catch
@@ -556,6 +547,7 @@ public sealed class DashboardViewModel : INotifyPropertyChanged
             PingMax = latencies.Max();
             PingAvg = latencies.Average();
         }
+    }
 
         var sent = latencies.Count + failures;
         PingPacketLoss = sent == 0 ? 0 : failures * 100.0 / sent;
@@ -568,27 +560,13 @@ public sealed class DashboardViewModel : INotifyPropertyChanged
     {
         TraceHops.Clear();
         TraceStatus = "Running...";
-        var isWindows = OperatingSystem.IsWindows();
-        var psi = new ProcessStartInfo(isWindows ? "tracert" : "traceroute", isWindows ? $"-d -h 20 {TraceTarget}" : $"-n -m 20 {TraceTarget}")
+        var lines = await _apiClientService.TracerouteAsync(TraceTarget, CancellationToken.None);
+        foreach (var line in lines)
         {
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
-
-        using var process = new Process { StartInfo = psi };
-        process.Start();
-        while (!process.StandardOutput.EndOfStream)
-        {
-            var line = await process.StandardOutput.ReadLineAsync();
-            if (string.IsNullOrWhiteSpace(line)) continue;
             var hop = ParseTraceHop(line);
             if (hop is not null) TraceHops.Add(hop);
         }
-
-        await process.WaitForExitAsync();
-        TraceStatus = "Complete";
+        TraceStatus = $"Complete ({TraceHops.Count} hops)";
     }
 
     private static TraceHop? ParseTraceHop(string line)
@@ -617,35 +595,42 @@ public sealed class DashboardViewModel : INotifyPropertyChanged
         IsPortScanRunning = true;
         PortResults.Clear();
         _portScanCts = new CancellationTokenSource();
-
-        var ports = ScanType switch
+        var backendResult = await _apiClientService.ScanPortsAsync(PortScanTarget, _portScanCts.Token);
+        var portsToDisplay = ScanType switch
         {
             PortScanType.CommonPorts => CommonPorts.AsEnumerable(),
             PortScanType.Top100 => Enumerable.Range(1, 100),
-            PortScanType.FullScan => Enumerable.Range(1, 65535),
+            PortScanType.FullScan => Enumerable.Range(1, 1024),
             PortScanType.CustomRange => ParseRange(CustomPortRange),
             _ => CommonPorts.AsEnumerable()
         };
 
-        ScannedCount = 0;
-        foreach (var port in ports)
+        var openSet = backendResult.OpenPorts.ToHashSet();
+        foreach (var port in portsToDisplay)
         {
-            if (_portScanCts.IsCancellationRequested) break;
-            var result = await ProbePortAsync(PortScanTarget, port);
+            var isOpen = openSet.Contains(port);
+            var risk = port switch
+            {
+                23 or 3389 => RiskLevel.Critical,
+                22 or 445 or 5900 => RiskLevel.High,
+                80 or 8080 => RiskLevel.Medium,
+                _ => RiskLevel.Low
+            };
+            var result = new PortResult
+            {
+                Port = port,
+                Protocol = "TCP",
+                ServiceName = ServiceNames.GetValueOrDefault(port, "Unknown"),
+                State = isOpen ? PortState.Open : PortState.Closed,
+                RiskLevel = isOpen ? risk : RiskLevel.Low
+            };
             PortResults.Add(result);
-            ScannedCount++;
-            OnPropertyChanged(nameof(OpenCount));
-            OnPropertyChanged(nameof(FilteredCount));
-            OnPropertyChanged(nameof(RiskScore));
-            OnPropertyChanged(nameof(CriticalPortCount));
-            OnPropertyChanged(nameof(FirewallCoverage));
-
-            if (result.RiskLevel is RiskLevel.High or RiskLevel.Critical)
+            if (isOpen && result.RiskLevel is RiskLevel.High or RiskLevel.Critical)
             {
                 AddAlert(new AlertItem
                 {
                     Title = "HIGH RISK PORT",
-                    Message = $"{PortScanTarget}:{port} {result.ServiceName} is {result.State}",
+                    Message = $"{PortScanTarget}:{port} {result.ServiceName} is OPEN",
                     Severity = AlertSeverity.Security,
                     Timestamp = DateTimeOffset.UtcNow,
                     IsRead = false
@@ -653,6 +638,12 @@ public sealed class DashboardViewModel : INotifyPropertyChanged
             }
         }
 
+        ScannedCount = PortResults.Count;
+        OnPropertyChanged(nameof(OpenCount));
+        OnPropertyChanged(nameof(FilteredCount));
+        OnPropertyChanged(nameof(RiskScore));
+        OnPropertyChanged(nameof(CriticalPortCount));
+        OnPropertyChanged(nameof(FirewallCoverage));
         IsPortScanRunning = false;
     }
 
@@ -691,14 +682,11 @@ public sealed class DashboardViewModel : INotifyPropertyChanged
 
     private async Task SendWolAsync()
     {
-        if (!int.TryParse(WolPort, out var port) || !IPAddress.TryParse(WolBroadcastIp, out var ip)) return;
-        var mac = NormalizeMac(WolMacAddress);
-        if (mac is null) return;
-        var packet = BuildMagicPacket(mac);
-        using var udp = new UdpClient();
-        udp.EnableBroadcast = true;
-        await udp.SendAsync(packet, packet.Length, new IPEndPoint(ip, port));
-        StatusMessage = "Magic packet sent.";
+        _ = int.TryParse(WolPort, out _);
+        _ = IPAddress.TryParse(WolBroadcastIp, out _);
+        if (string.IsNullOrWhiteSpace(WolMacAddress)) return;
+        var response = await _apiClientService.SendWakeOnLanAsync(WolMacAddress);
+        StatusMessage = response;
     }
 
     private async Task TestReachabilityAsync()
